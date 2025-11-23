@@ -1,17 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using EOAP.Plugin.AP;
+using System.Collections.Generic;
 
 namespace EOAP.Plugin
 {
     public static class EO1
     {
         public const string WorldName = "Etrian Odyssey HD";
-        // DB
-        public static Dictionary<int, string> ItemIDToName = new Dictionary<int, string>()
+        // Locations
+        public static readonly Dictionary<int, string> ItemIDToName = new Dictionary<int, string>()
         {
             { 1, "Knife" },
         };
 
-        public static Dictionary<uint, string> TreasureBox = new Dictionary<uint, string>()
+        public static readonly Dictionary<uint, string> TreasureBox = new Dictionary<uint, string>()
         {
             { 0, "B1F East: North Chest" },
             { 1, "B1F Main: A3 Top Chest" },
@@ -24,7 +25,6 @@ namespace EOAP.Plugin
             { 8, "B1F Violet Crystal Room: Bottom Chest"},
             { 9 , "B1F East: Ragelope Bottom Chest" }
         };
-
 
         // API
         public static string GetShopLocation(int itemID)
