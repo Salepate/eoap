@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
-using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
 using Il2CppInterop.Runtime.Injection;
 using UnityEngine;
@@ -22,7 +21,6 @@ namespace EOAP.Plugin
             // Plugin startup logic
             Log = base.Log;
             Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
-
 
             ClassInjector.RegisterTypeInIl2Cpp<APBehaviour>();
             GameObject apGO = new GameObject("AP");
