@@ -2,11 +2,23 @@
 
 ## Informations
 
+This is a work in progress
 Require to downgrade EO: HD to the first version
+
+## Licensing
+
+There is no Licence at the the moment. <br/>
+No one may reproduce, distribute or create derivative work
+
+## Building
+* Run Bepinex 6-x (ClrCore Runtime) Once, close EOHD
+* Update Path for all references in .csproj if steam is installed elsewhere (probably)
+  * This path C:\Games\Steam\steamapps\common\EOHD\BepInEx\interop\
+* Edit APUI.cs (change hostname and slotname)
 
 ## Testing
 
-* Edit APUI.cs (change hostname and slotname)
+* Download a release OR
 * Publish, copy content in bepinex plugins folder
 
 ## Hierarchy
