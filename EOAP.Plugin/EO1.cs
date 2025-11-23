@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EOAP.Plugin.Patcher
+namespace EOAP.Plugin
 {
     public static class EO1
     {
