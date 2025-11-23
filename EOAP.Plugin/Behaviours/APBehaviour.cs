@@ -69,8 +69,6 @@ namespace EOAP.Plugin.Behaviours
             InControl.InputManager.Enabled = false;
         }
 
-
-        private bool _lockInputs;
         private void OnGUI()
         {
             float uiHeight = _showDebug ? WindowHeight : WindowHeight + DebugHeight;
