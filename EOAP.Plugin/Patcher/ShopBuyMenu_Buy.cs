@@ -1,8 +1,5 @@
-﻿using Archipelago.MultiClient.Net;
-using Archipelago.MultiClient.Net.Helpers;
-using EOAP.Plugin.Behaviours;
+﻿using EOAP.Plugin.Behaviours;
 using HarmonyLib;
-using System.Runtime.CompilerServices;
 using Town;
 
 namespace EOAP.Plugin.Patcher
