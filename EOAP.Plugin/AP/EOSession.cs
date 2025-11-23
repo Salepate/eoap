@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using System.Collections.Generic;
 
 namespace EOAP.Plugin.AP
 {
@@ -8,6 +9,39 @@ namespace EOAP.Plugin.AP
         public string ErrorMessage { get; private set; }
         public bool Connected { get; private set; }
         public ArchipelagoSession Session { get; private set; }
+
+        private List<long> _idsBuffer = new List<long>();
+
+
+        public void SendLocation(params string[] locations)
+        {
+            _idsBuffer.Clear();
+            string firstCheckName = string.Empty;
+            for(int i = 0; i < locations.Length; ++i)
+            {
+                long id = Session.Locations.GetLocationIdFromName(EO1.WorldName, locations[i]);
+                if (id <= 0)
+                {
+                    GDebug.Log($"Unknown Location: {locations[i]}");
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(firstCheckName))
+                        firstCheckName = locations[i];
+                    _idsBuffer.Add(id);
+                }
+            }
+
+            if (_idsBuffer.Count > 0)
+            {
+                if (_idsBuffer.Count == 1)
+                    GDebug.Log($"Check - {firstCheckName}");
+                else
+                    GDebug.Log($"Check - {_idsBuffer.Count} checks found");
+                Session.Locations.CompleteLocationChecks(_idsBuffer.ToArray());
+            }
+
+        }
 
         public void Start(string slotName, string hostname, int port)
         {

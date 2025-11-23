@@ -39,7 +39,7 @@ namespace EOAP.Plugin.Behaviours
             }
         }
 
-        public static ArchipelagoSession GetSession() => s_Instance._session.Session;
+        public static EOSession GetSession() => s_Instance._session;
 
         public APBehaviour(IntPtr ptr) : base(ptr)
         {
