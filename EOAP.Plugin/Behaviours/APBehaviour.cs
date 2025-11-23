@@ -1,7 +1,7 @@
-﻿using Archipelago.MultiClient.Net;
-using DungeonData;
-using EOAP.Plugin.AP;
+﻿using EOAP.Plugin.AP;
+using EOAP.Plugin.DB;
 using HarmonyLib;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,8 +10,8 @@ namespace EOAP.Plugin.Behaviours
 {
     public class APBehaviour : MonoBehaviour
     {
-        public const float WindowHeight = 80f;
-        public const float DebugHeight = 160f;
+        public const float WindowHeight = 40f;
+        public const float DebugHeight = 120f;
         public enum APState
         {
             Offline,
@@ -20,7 +20,7 @@ namespace EOAP.Plugin.Behaviours
 
         // api
         private EOSession _session;
-
+        private EOPersistent _persistent;
         // internal state
         private bool _showDebug;
         private APUI _UI;
@@ -36,10 +36,15 @@ namespace EOAP.Plugin.Behaviours
             if (s_Instance._state != newState)
             {
                 s_Instance._state = newState;
+                switch (newState)
+                {
+                    case APState.Connected: s_Instance.OnState_Connected(); break;
+                }
             }
         }
 
         public static EOSession GetSession() => s_Instance._session;
+        public static EOPersistent GetPersistent() => s_Instance._persistent;
 
         public APBehaviour(IntPtr ptr) : base(ptr)
         {
@@ -48,6 +53,7 @@ namespace EOAP.Plugin.Behaviours
 
         private void Start()
         {
+            _persistent = new EOPersistent();
             s_Instance = this;
             // State
             _showDebug = true;
@@ -71,7 +77,7 @@ namespace EOAP.Plugin.Behaviours
 
         private void OnGUI()
         {
-            float uiHeight = _showDebug ? WindowHeight : WindowHeight + DebugHeight;
+            float uiHeight = _showDebug ? WindowHeight + DebugHeight : WindowHeight;
             Rect debugRect = new Rect(10f, Screen.height - (uiHeight + 10f), Screen.width - 20f, uiHeight);
             GUI.BeginGroup(debugRect, GUI.skin.box);
             int stateIndex = (int)_state;
@@ -98,9 +104,39 @@ namespace EOAP.Plugin.Behaviours
             }
         }
 
+        // States Changes
+        private void OnState_Connected()
+        {
+            bool loaded = false;
+            // load save
+            try
+            {
+                if (System.IO.File.Exists(EOPersistent.GetFilePath()))
+                {
+                    string extraData = System.IO.File.ReadAllText(EOPersistent.GetFilePath());
+                    _persistent = JsonConvert.DeserializeObject<EOPersistent>(extraData);
+                    loaded = true;
+                }
+            }
+            catch(System.Exception e)
+            {
+                GDebug.Log("Failed to load custom save");
+                _persistent = new EOPersistent();
+            }
+
+            if (!loaded)
+            {
+                GDebug.Log("Creating custom save file");
+                _persistent = new EOPersistent();
+            }
+        }
+
         // Debugging
         private void ShowDebugUI()
         {
+            GUILayout.BeginHorizontal();
+
+            GUILayout.BeginVertical();
             if (GUILayout.Button("Toggle Debug Menu"))
             {
                 DebugManager.JAOFCFFEELF.Open();
@@ -112,7 +148,27 @@ namespace EOAP.Plugin.Behaviours
             {
                 InControl.InputManager.Enabled = !inputState;
             }
-        }
+            GUILayout.EndVertical();
+            GUILayout.BeginVertical();
+            if (GUILayout.Button("Save Persistent"))
+            {
+                string persistentData = JsonConvert.SerializeObject(_persistent);
+                System.IO.File.WriteAllText(EOPersistent.GetFilePath(), persistentData);
+            }
+            GUILayout.EndVertical();
 
+            GUILayout.BeginVertical();
+            if (GUILayout.Button("Load DynDB"))
+            {
+                Builder.Load("dyndb.json");
+            }
+            if (GUILayout.Button("Save DynDB"))
+            {
+                Builder.Dump("dyndb.json");
+            }
+            GUILayout.EndVertical();
+
+            GUILayout.EndHorizontal();
+        }
     }
 }
