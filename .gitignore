@@ -1,0 +1,5 @@
+# VS 2022
+.vs/
+*.csproj.user
+EOAP.Plugin/obj/
+EOAP.Plugin/bin/
