@@ -2,8 +2,9 @@
 
 ## Informations
 
-This is a work in progress
-Require to downgrade EO: HD to the first version
+This is a work in progress.<br/>
+Require to downgrade EO: HD to the first version<br/>
+[AP World (Require AP 0.6.5)](https://github.com/wolicodes/Archipelago/tree/eo1-hd)
 
 ## Licensing
 
