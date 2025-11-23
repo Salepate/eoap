@@ -1,6 +1,8 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Models;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace EOAP.Plugin.AP
 {
@@ -79,6 +81,27 @@ namespace EOAP.Plugin.AP
             }
 
             Connected = result.Successful;
+        }
+
+
+        // Sync (send/receive all locations already done)
+        public void LoadFlags(EOPersistent persistent)
+        {
+            ReadOnlyCollection<ItemInfo> received = Session.Items.AllItemsReceived;
+
+            for(int i = persistent.LastIndex + 1; i < received.Count; ++i)
+            {
+                ItemInfo item = received[i];
+                if (item.ItemId > (long) ItemNoEnum.ITEM_NO.ITEM_NOT && item.ItemId < (long)ItemNoEnum.ITEM_NO.ITEM_END)
+                {
+                    GoldItem.AddPartyItem((ItemNoEnum.ITEM_NO)item.ItemId);
+                }
+                else
+                {
+                    GDebug.Log("Unsupported Item (yet): " + item.ItemDisplayName + " ("+item.ItemId+")"); 
+                }
+                persistent.LastIndex = i;
+            }
         }
     }
 }
