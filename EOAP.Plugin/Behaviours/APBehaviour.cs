@@ -53,6 +53,7 @@ namespace EOAP.Plugin.Behaviours
 
         private void Start()
         {
+            APConnection connectionFile = APConnection.LoadConnectionFile();
             _persistent = new EOPersistent();
             s_Instance = this;
             // State
@@ -62,6 +63,8 @@ namespace EOAP.Plugin.Behaviours
 
             // UI Views
             _UI = new APUI();
+            _UI.Hostname = connectionFile.Hostname;
+            _UI.SlotName = connectionFile.Slotname;
             _UIActions = new System.Func<APUI.UIAction>[2];
             _UIActions[0] = _UI.DrawConnectionMenu; // Offline
             _UIActions[1] = _UI.DrawSessionMenu; // Connected

@@ -6,9 +6,9 @@ namespace EOAP.Plugin.Behaviours
     // IMGUI UI
     public class APUI
     {
-        public string Hostname { get; private set; }
+        public string Hostname { get; set; }
         public string HostnameNoPort { get; private set; }
-        public string SlotName { get; private set; }
+        public string SlotName { get; set; }
         public int HostPort { get; private set; }
         public enum UIAction
         {
@@ -18,9 +18,6 @@ namespace EOAP.Plugin.Behaviours
 
         public APUI()
         {
-            // Debug
-            Hostname = "archipelago.gg:59375";
-            SlotName = "Player1";
         }
 
 
