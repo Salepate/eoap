@@ -9,8 +9,10 @@ namespace EOAP.Plugin.Behaviours
     {
         public const int ConcurrentNotifications = 10;
         public string Hostname { get; set; }
-        public string HostnameNoPort { get; private set; }
         public string SlotName { get; set; }
+        public bool ShowUI { get; set; }
+
+        public string HostnameNoPort { get; private set; }
         public int HostPort { get; private set; }
         public enum UIAction
         {
@@ -23,6 +25,7 @@ namespace EOAP.Plugin.Behaviours
             ActiveNotifications = new List<Notification>();
             PendingNotifications = new Queue<Notification>();
             _time = 0f;
+            ShowUI = true;
 
         }
 

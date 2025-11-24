@@ -79,9 +79,28 @@ namespace EOAP.Plugin.Behaviours
         private void OnGUI()
         {
             _UI.DrawNotificationScreen();
-            
+
             float uiHeight = _showDebug ? WindowHeight + DebugHeight : WindowHeight;
             Rect debugRect = new Rect(10f, Screen.height - (uiHeight + 10f), Screen.width - 20f, uiHeight);
+            Rect toggleUIRect = debugRect;
+            toggleUIRect.width = 16f;
+            toggleUIRect.height = 16f;
+            toggleUIRect.y = debugRect.y - 16f;
+
+
+            GUI.BeginGroup(toggleUIRect, GUI.skin.box);
+            if (GUI.Button(new Rect(0f, 0f, 16f, 16f), _UI.ShowUI ? "-" : "+"))
+            {
+                _UI.ShowUI =  !_UI.ShowUI;
+            }
+            GUI.EndGroup();
+
+
+            if (!_UI.ShowUI)
+            {
+                return;
+            }
+
             GUI.BeginGroup(debugRect, GUI.skin.box);
             int stateIndex = (int)_state;
             APUI.UIAction action = _UIActions[stateIndex]();
