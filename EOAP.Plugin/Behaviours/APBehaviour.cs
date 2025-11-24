@@ -168,6 +168,13 @@ namespace EOAP.Plugin.Behaviours
             }
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
+            bool guiState = GUI.enabled;
+            GUI.enabled = _session.Connected;
+            if (GUILayout.Button("Sync New Items"))
+            {
+                _session.SyncNewItems(_persistent, false);
+            }
+            GUI.enabled = guiState;
             if (GUILayout.Button("Save Persistent"))
             {
                 string persistentData = JsonConvert.SerializeObject(_persistent);
@@ -175,16 +182,16 @@ namespace EOAP.Plugin.Behaviours
             }
             GUILayout.EndVertical();
 
-            GUILayout.BeginVertical();
-            if (GUILayout.Button("Load DynDB"))
-            {
-                Builder.Load("dyndb.json");
-            }
-            if (GUILayout.Button("Save DynDB"))
-            {
-                Builder.Dump("dyndb.json");
-            }
-            GUILayout.EndVertical();
+            //GUILayout.BeginVertical();
+            //if (GUILayout.Button("Load DynDB"))
+            //{
+            //    Builder.Load("dyndb.json");
+            //}
+            //if (GUILayout.Button("Save DynDB"))
+            //{
+            //    Builder.Dump("dyndb.json");
+            //}
+            //GUILayout.EndVertical();
             GUILayout.EndHorizontal();
         }
     }

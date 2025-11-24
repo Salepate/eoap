@@ -4,6 +4,7 @@ using Archipelago.MultiClient.Net.Models;
 using EOAP.Plugin.Behaviours;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using UnityEngine;
 
 namespace EOAP.Plugin.AP
 {
@@ -108,17 +109,21 @@ namespace EOAP.Plugin.AP
             }
         }
 
-        public void LoadFlags(EOPersistent persistent)
+        public void SyncNewItems(EOPersistent persistent, bool silent)
         {
             ReadOnlyCollection<ItemInfo> received = Session.Items.AllItemsReceived;
 
-            for(int i = persistent.LastIndex + 1; i < received.Count; ++i)
+            for (int i = persistent.LastIndex + 1; i < received.Count; ++i)
             {
                 ItemInfo item = received[i];
-                SyncItem(item, true);
+                SyncItem(item, silent);
                 persistent.LastIndex = i;
             }
+        }
 
+        public void LoadFlags(EOPersistent persistent)
+        {
+            SyncNewItems(persistent, true);
             // resend all locations
             Session.Locations.CompleteLocationChecks(persistent.CompleteLocations.ToArray());
         }
