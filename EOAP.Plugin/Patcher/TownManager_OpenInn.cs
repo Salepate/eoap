@@ -32,14 +32,14 @@ namespace EOAP.Plugin.Patcher
 
         private static void OnItemReceived(ReceivedItemsHelper helper)
         {
-            ItemInfo nextItem;
-            while ( (nextItem = helper.PeekItem()) != null)
-            {
-                _session.SyncItem(nextItem, false);
+            //ItemInfo nextItem;
+            //while ( (nextItem = helper.PeekItem()) != null)
+            //{
+            //    _session.SyncItem(nextItem, false);
 
-                helper.DequeueItem();
-            }
-            _persistent.LastIndex = helper.AllItemsReceived.Count - 1;
+            //    helper.DequeueItem();
+            //}
+            //_persistent.LastIndex = helper.AllItemsReceived.Count - 1;
         }
     }
 }
