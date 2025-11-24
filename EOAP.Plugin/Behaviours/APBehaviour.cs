@@ -18,10 +18,10 @@ namespace EOAP.Plugin.Behaviours
             Connected
         }
 
-        // api
+
+        // internal state
         private EOSession _session;
         private EOPersistent _persistent;
-        // internal state
         private bool _showDebug;
         private APUI _UI;
         private System.Func<APUI.UIAction>[] _UIActions;
@@ -31,20 +31,12 @@ namespace EOAP.Plugin.Behaviours
 
         private static APBehaviour s_Instance;
 
-        public static void ChangeState(APState newState)
-        {
-            if (s_Instance._state != newState)
-            {
-                s_Instance._state = newState;
-                switch (newState)
-                {
-                    case APState.Connected: s_Instance.OnState_Connected(); break;
-                }
-            }
-        }
 
+        // API
         public static EOSession GetSession() => s_Instance._session;
         public static EOPersistent GetPersistent() => s_Instance._persistent;
+
+        public static void PushNotification(string notification, float duration = 2f) => s_Instance._UI.PushNotification(notification, duration);
 
         public APBehaviour(IntPtr ptr) : base(ptr)
         {
@@ -78,8 +70,16 @@ namespace EOAP.Plugin.Behaviours
             InControl.InputManager.Enabled = false;
         }
 
+        private void Update()
+        {
+            float dt = Time.deltaTime;
+            _UI.Update(dt);
+        }
+
         private void OnGUI()
         {
+            _UI.DrawNotificationScreen();
+            
             float uiHeight = _showDebug ? WindowHeight + DebugHeight : WindowHeight;
             Rect debugRect = new Rect(10f, Screen.height - (uiHeight + 10f), Screen.width - 20f, uiHeight);
             GUI.BeginGroup(debugRect, GUI.skin.box);
@@ -95,9 +95,24 @@ namespace EOAP.Plugin.Behaviours
             {
                 uiAction();
             }
+
+
         }
 
         // UI Actions
+
+        private static void ChangeState(APState newState)
+        {
+            if (s_Instance._state != newState)
+            {
+                s_Instance._state = newState;
+                switch (newState)
+                {
+                    case APState.Connected: s_Instance.OnState_Connected(); break;
+                }
+            }
+        }
+
         private void StartSession()
         {
             _session.Start(_UI.SlotName, _UI.HostnameNoPort, _UI.HostPort);
@@ -170,7 +185,6 @@ namespace EOAP.Plugin.Behaviours
                 Builder.Dump("dyndb.json");
             }
             GUILayout.EndVertical();
-
             GUILayout.EndHorizontal();
         }
     }
