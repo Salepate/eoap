@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
+using EOAP.Plugin.Behaviours;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -40,7 +41,11 @@ namespace EOAP.Plugin.AP
                     GDebug.Log($"Check - {firstCheckName}");
                 else
                     GDebug.Log($"Check - {_idsBuffer.Count} checks found");
+
+                EOPersistent persistentData = APBehaviour.GetPersistent();
                 Session.Locations.CompleteLocationChecks(_idsBuffer.ToArray());
+                for (int i = 0; i < _idsBuffer.Count; ++i)
+                    persistentData.AddLocation(_idsBuffer[i]);
             }
 
         }
@@ -85,6 +90,19 @@ namespace EOAP.Plugin.AP
 
 
         // Sync (send/receive all locations already done)
+        public void SyncItem(ItemInfo item, bool silent)
+        {
+
+            if (item.ItemId > (long)ItemNoEnum.ITEM_NO.ITEM_NOT && item.ItemId < (long)ItemNoEnum.ITEM_NO.ITEM_END)
+            {
+                GoldItem.AddPartyItem((ItemNoEnum.ITEM_NO)item.ItemId);
+            }
+            else
+            {
+                GDebug.Log("Unsupported Item (yet): " + item.ItemDisplayName + " (" + item.ItemId + ")");
+            }
+        }
+
         public void LoadFlags(EOPersistent persistent)
         {
             ReadOnlyCollection<ItemInfo> received = Session.Items.AllItemsReceived;
@@ -92,16 +110,12 @@ namespace EOAP.Plugin.AP
             for(int i = persistent.LastIndex + 1; i < received.Count; ++i)
             {
                 ItemInfo item = received[i];
-                if (item.ItemId > (long) ItemNoEnum.ITEM_NO.ITEM_NOT && item.ItemId < (long)ItemNoEnum.ITEM_NO.ITEM_END)
-                {
-                    GoldItem.AddPartyItem((ItemNoEnum.ITEM_NO)item.ItemId);
-                }
-                else
-                {
-                    GDebug.Log("Unsupported Item (yet): " + item.ItemDisplayName + " ("+item.ItemId+")"); 
-                }
+                SyncItem(item, true);
                 persistent.LastIndex = i;
             }
+
+            // resend all locations
+            Session.Locations.CompleteLocationChecks(persistent.CompleteLocations.ToArray());
         }
     }
 }
