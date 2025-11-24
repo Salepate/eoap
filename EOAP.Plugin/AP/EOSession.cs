@@ -1,10 +1,10 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
 using EOAP.Plugin.Behaviours;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using UnityEngine;
 
 namespace EOAP.Plugin.AP
 {
@@ -20,6 +20,8 @@ namespace EOAP.Plugin.AP
         public void SendLocation(params string[] locations)
         {
             _idsBuffer.Clear();
+            EOPersistent persistentData = APBehaviour.GetPersistent();
+
             string firstCheckName = string.Empty;
             for(int i = 0; i < locations.Length; ++i)
             {
@@ -33,7 +35,8 @@ namespace EOAP.Plugin.AP
                     if (string.IsNullOrEmpty(firstCheckName))
                         firstCheckName = locations[i];
                     _idsBuffer.Add(id);
-                    APBehaviour.PushNotification($"Checked {locations[i]}");
+                    //if (!persistentData.CompleteLocations.Contains(id))
+                    //    APBehaviour.PushNotification($"Checked {locations[i]}");
                 }
             }
 
@@ -44,7 +47,6 @@ namespace EOAP.Plugin.AP
                 else
                     GDebug.Log($"Check - {_idsBuffer.Count} checks found");
 
-                EOPersistent persistentData = APBehaviour.GetPersistent();
                 Session.Locations.CompleteLocationChecks(_idsBuffer.ToArray());
                 for (int i = 0; i < _idsBuffer.Count; ++i)
                     persistentData.AddLocation(_idsBuffer[i]);
@@ -59,6 +61,7 @@ namespace EOAP.Plugin.AP
 
             ErrorMessage = string.Empty;
             Session = ArchipelagoSessionFactory.CreateSession(hostname, port);
+            Session.MessageLog.OnMessageReceived += OnMessageReceived;
 
             System.Version worldVersion = new System.Version(0, 6, 4);
             LoginResult result;
@@ -88,6 +91,21 @@ namespace EOAP.Plugin.AP
             }
 
             Connected = result.Successful;
+        }
+
+        private void OnMessageReceived(LogMessage message)
+        {
+            if (message is ItemSendLogMessage sendLogMessage)
+            {
+                if (sendLogMessage is not HintItemSendLogMessage && sendLogMessage.IsSenderTheActivePlayer && !sendLogMessage.IsReceiverTheActivePlayer)
+                {
+                    string? itemName = sendLogMessage.Item.ItemName;
+                    string? messageText;
+                    string? otherPlayer = Session.Players.GetPlayerAlias(sendLogMessage.Receiver.Slot);
+                    messageText = $"Sent {itemName} to {otherPlayer}.";
+                    APBehaviour.PushNotification(messageText);
+                }
+            }
         }
 
 
@@ -124,8 +142,43 @@ namespace EOAP.Plugin.AP
         public void LoadFlags(EOPersistent persistent)
         {
             SyncNewItems(persistent, true);
+
+            // update persistent data 
+            for(int i = 0; i < Session.Locations.AllLocationsChecked.Count; ++i)
+            {
+                persistent.AddLocation(Session.Locations.AllLocationsChecked[i]);
+            }
+
             // resend all locations
             Session.Locations.CompleteLocationChecks(persistent.CompleteLocations.ToArray());
+
+            // prepare fast memory for ingame patches
+            EOMemory.PrepareMemory();
+            foreach(var shopLocKVP in EO1.ItemIDToName)
+            {
+                long locID = Session.Locations.GetLocationIdFromName(EO1.WorldName, EO1.GetShopLocation(shopLocKVP.Key));
+                if (Session.Locations.AllLocationsChecked.Contains(locID))
+                {
+                    GDebug.Log("Flagging " + shopLocKVP.Value);
+                    EOMemory.ShopLocations[shopLocKVP.Key] = true;
+                }
+            }
+        }
+
+        public long GetLocationId(string loc)
+        {
+            if (string.IsNullOrEmpty(loc))
+            {
+                GDebug.Log("Invalid Location name");
+                return 0;
+            }
+
+            long locid = Session.Locations.GetLocationIdFromName(EO1.WorldName, loc);
+            if (locid > 0)
+                return locid;
+
+            GDebug.Log("Location " + loc + " not found in AP World");
+            return 0;
         }
     }
 }

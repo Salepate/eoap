@@ -1,5 +1,4 @@
 ﻿using EOAP.Plugin.AP;
-using EOAP.Plugin.DB;
 using HarmonyLib;
 using Newtonsoft.Json;
 using System;
