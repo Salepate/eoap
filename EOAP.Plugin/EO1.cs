@@ -9,7 +9,34 @@ namespace EOAP.Plugin
         // Locations
         public static readonly Dictionary<int, string> ItemIDToName = new Dictionary<int, string>()
         {
+            // Weapon: Swords
             { 1, "Knife" },
+            { 2, "Scramasax" },
+            { 3, "Dagger" },
+            // Weapon: Staves
+            { 40, "Wand"},
+            { 54, "Staff" },
+            // Weapon: Axes
+            { 50, "Hatchet" },
+            // Weapon: Bows
+            { 88, "Wood Bow" },
+            // Weapon: Whips
+            { 112, "Light Whip" },
+            // Armor: Chests
+            { 1001, "Tweed" },
+            // Armor: Shields
+            { 2038, "Targe" },
+            // Armor: Headgears
+            { 2001, "Hairpin" },
+            // Armor: Gloves
+            { 2018, "Knit Glove" },
+            // Armor: Footgears
+            { 2056, "Leaf Boot" },
+            // Armor: Accessories
+            { 3001, "Hide Belt" },
+            // Consumable - Shop
+            { 4319, "Ward Chime" },
+            { 4374, "Ariadne Thread"}
         };
 
         public static readonly Dictionary<uint, string> TreasureBox = new Dictionary<uint, string>()
