@@ -32,6 +32,7 @@ namespace EOAP.Plugin.AP
                     if (string.IsNullOrEmpty(firstCheckName))
                         firstCheckName = locations[i];
                     _idsBuffer.Add(id);
+                    APBehaviour.PushNotification($"Checked {locations[i]}");
                 }
             }
 
@@ -92,6 +93,10 @@ namespace EOAP.Plugin.AP
         // Sync (send/receive all locations already done)
         public void SyncItem(ItemInfo item, bool silent)
         {
+            if (!silent)
+            {
+                APBehaviour.PushNotification($"Received {item.ItemDisplayName}", 3f);
+            }
 
             if (item.ItemId > (long)ItemNoEnum.ITEM_NO.ITEM_NOT && item.ItemId < (long)ItemNoEnum.ITEM_NO.ITEM_END)
             {
