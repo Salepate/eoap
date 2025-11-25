@@ -19,6 +19,11 @@ namespace EOAP.Plugin.AP
 
         public void SendLocation(params string[] locations)
         {
+            if (!Connected)
+            {
+                GDebug.Log("Cannot send locations AP, not connected");
+                return;
+            }
             _idsBuffer.Clear();
             EOPersistent persistentData = APBehaviour.GetPersistent();
 
