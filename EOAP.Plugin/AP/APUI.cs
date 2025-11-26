@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EOAP.Plugin.Behaviours;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace EOAP.Plugin.AP
@@ -7,6 +8,13 @@ namespace EOAP.Plugin.AP
     // IMGUI UI
     public class APUI
     {
+        // Notifications Data
+        private float _time;
+        private float _delay;
+        private List<NotificationBehaviour> ActiveNotifications;
+        private Queue<Notification> PendingNotifications;
+        private Queue<NotificationBehaviour> _notificationPool;
+        private bool[] _notificationSlots;
         public const int ConcurrentNotifications = 10;
         public string Hostname { get; set; }
         public string SlotName { get; set; }
@@ -22,11 +30,11 @@ namespace EOAP.Plugin.AP
 
         public APUI()
         {
-            ActiveNotifications = new List<Notification>();
+            ActiveNotifications = new List<NotificationBehaviour>();
+            _notificationPool = new Queue<NotificationBehaviour>();
             PendingNotifications = new Queue<Notification>();
             _time = 0f;
             ShowUI = true;
-
         }
 
         public void Update(float deltaTime)
@@ -48,6 +56,7 @@ namespace EOAP.Plugin.AP
             GUILayout.BeginHorizontal(GUI.skin.box);
             GUILayout.Label("Server");
             GUILayout.Label(Hostname);
+            // Crash (Stripped calls)
             //Hostname = GUILayout.TextField(Hostname, GUILayout.Width(200f));
             GUILayout.Label("Slot");
             GUILayout.Label(SlotName);
@@ -72,32 +81,10 @@ namespace EOAP.Plugin.AP
         }
 
 
-        // Debug Notification System
-        private float _time;
-        private float _delay;
-        private List<Notification> ActiveNotifications;
-        private Queue<Notification> PendingNotifications;
-        private struct Notification
+        public struct Notification
         {
             public string Text;
             public float Timestamp;
-        }
-
-        public void DrawNotificationScreen()
-        {
-            float height = ActiveNotifications.Count * 32f;
-            Rect pos = new Rect(Screen.width - 250f, 10f, 240f, height);
-
-            if (ActiveNotifications.Count == 0)
-                return;
-
-            GUI.BeginGroup(pos, GUI.skin.box);
-            for (int i = 0; i < ActiveNotifications.Count; ++i)
-            {
-                Rect labelRect = new Rect(0f, i * 32f, 240f, 32f);
-                GUI.Label(labelRect, ActiveNotifications[i].Text);
-            }
-            GUI.EndGroup();
         }
 
         public void PushNotification(string text, float duration = 1f)
@@ -115,8 +102,10 @@ namespace EOAP.Plugin.AP
         {
             for (int i = 0; i < ActiveNotifications.Count; ++i)
             {
-                if (ActiveNotifications[i].Timestamp < _time)
+                if (ActiveNotifications[i].IsComplete)
                 {
+                    _notificationSlots[ActiveNotifications[i].Slot] = false;
+                    _notificationPool.Enqueue(ActiveNotifications[i]);
                     ActiveNotifications.RemoveAt(i--);
                 }
             }
@@ -132,12 +121,45 @@ namespace EOAP.Plugin.AP
                 return;
             }
 
-            while (ActiveNotifications.Count < ConcurrentNotifications && PendingNotifications.Count > 0)
+            bool playSound = ActiveNotifications.Count == 0;
+
+            while (_notificationPool.Count > 0 && PendingNotifications.Count > 0)
             {
+                if (playSound)
+                {
+                    EO1.PlaySFX(APCanvasRipper.SFX.GamePurchase);
+                    playSound = false;
+                }
+                int slot = -1;
+
+                for(int j = 0; j < _notificationSlots.Length; ++j)
+                {
+                    if (!_notificationSlots[j])
+                    {
+                        slot = j;
+                        break;
+                    }
+                }
+
+                if (slot == -1)
+                    slot = 0;
+
                 Notification notification = PendingNotifications.Dequeue();
-                notification.Timestamp += _time;
-                ActiveNotifications.Add(notification);
+                NotificationBehaviour bhv = _notificationPool.Dequeue();
+                bhv.SetNotification(notification);
+                ActiveNotifications.Add(bhv);
+                _notificationSlots[slot] = true;
+                bhv.ShowNotification(slot, 2f);
             }
+        }
+
+        internal void CreateNotificationSystem()
+        {
+            for (int i = 0; i < ConcurrentNotifications; ++i)
+            {
+                _notificationPool.Enqueue(NotificationBehaviour.Create());
+            }
+            _notificationSlots = new bool[ConcurrentNotifications];
         }
     }
 }

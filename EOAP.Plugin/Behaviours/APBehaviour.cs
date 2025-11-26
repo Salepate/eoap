@@ -34,6 +34,7 @@ namespace EOAP.Plugin.Behaviours
 
 
         // API
+        public static APUI UI => s_Instance._UI;
         public static EOSession GetSession() => s_Instance._session;
         public static EOPersistent GetPersistent() => s_Instance._persistent;
 
@@ -82,8 +83,6 @@ namespace EOAP.Plugin.Behaviours
 
         private void OnGUI()
         {
-            _UI.DrawNotificationScreen();
-
             float height = WindowHeight;
             if (_showDebug)
                 height += DebugHeight;

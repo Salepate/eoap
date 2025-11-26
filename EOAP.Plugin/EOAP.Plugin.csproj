@@ -37,6 +37,10 @@
       <HintPath>C:\Games\Steam\steamapps\common\EOHD\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="DOTween">
+      <HintPath>C:\Games\Steam\steamapps\common\EOHD\BepInEx\interop\DOTween.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Il2Cppmscorlib">
       <HintPath>C:\Games\Steam\steamapps\common\EOHD\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>
@@ -61,6 +65,10 @@
       <HintPath>C:\Games\Steam\steamapps\common\EOHD\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UniRx">
+      <HintPath>C:\Games\Steam\steamapps\common\EOHD\BepInEx\interop\UniRx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.InputSystem">
       <HintPath>C:\Games\Steam\steamapps\common\EOHD\BepInEx\interop\Unity.InputSystem.dll</HintPath>
       <Private>False</Private>
@@ -79,6 +87,10 @@
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>C:\Games\Steam\steamapps\common\EOHD\BepInEx\interop\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>C:\Games\Steam\steamapps\common\EOHD\BepInEx\interop\UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
@@ -107,4 +119,7 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(OutputPath) C:\Games\Steam\steamapps\common\EOHD\BepInEx\plugins\ /i /y" />
+  </Target>
 </Project>

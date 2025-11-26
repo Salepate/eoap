@@ -22,6 +22,7 @@ namespace EOAP.Plugin
             Log = base.Log;
             Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
+            ClassInjector.RegisterTypeInIl2Cpp<NotificationBehaviour>();
             ClassInjector.RegisterTypeInIl2Cpp<APBehaviour>();
             GameObject apGO = new GameObject("AP");
             apGO.hideFlags = HideFlags.HideAndDontSave;

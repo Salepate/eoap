@@ -54,6 +54,11 @@ namespace EOAP.Plugin
         };
 
         // API
+        public static void PlaySFX(APCanvasRipper.SFX sfx)
+        {
+            string sfxName = APCanvasRipper.SFXPath[(int)sfx];
+            SoundManager.playSE(sfxName);
+        }
         public static string GetShopLocation(int itemID)
         {
             if (ItemIDToName.TryGetValue(itemID, out string itemName))

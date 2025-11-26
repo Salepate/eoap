@@ -14,6 +14,10 @@ namespace EOAP.Plugin.Patcher
         public static bool Prefix(ShopBuyMenu __instance, int GBKKIPAKICJ, bool ACINHONNBOB, int MEJKMPOGAEN = 1)
         {
             AP.EOSession session = APBehaviour.GetSession();
+            // TODO: Apply this Patch only after connecting to a session
+            if (session == null || !session.Connected)
+                return true;
+
             bool invokeOriginal = true;
 
             int itemID = GBKKIPAKICJ;

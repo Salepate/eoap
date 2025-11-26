@@ -6,6 +6,43 @@ namespace EOAP.Plugin.AP
 {
     public static class APCanvasRipper
     {
+        // 
+        // Sounds
+        //
+        public enum SFX
+        {
+            SystemOk,
+            SystemOkAlt,
+            SystemCancel,
+            CursorHover,
+            GamePurchase,
+            ClockTick,
+            ClockBell,
+            UseStairs,
+            GridPan,
+            SelectTool,
+            DrawLine,
+            ClearMap,
+        }
+
+        public static string[] SFXPath = 
+        [
+            "SE_SYS_OK2",
+            "SE_SYS_OK1",
+            "SE_SYS_CANCEL",
+            "SE_SYS_CURSOR",
+            "SE_SYS_PAY",
+            "SE_SYS_CLOCK1",
+            "SE_SYS_CLOCK2",
+            "SE_DNG_STAIR",
+            "SE_SYS_GRID",
+            "SE_SYS_TOOL",
+            "SE_SYS_PEN",
+            "SE_SYS_FLOOR",
+        ];
+        //
+        // UI
+        //
         public static RectTransform NotificationRoot;
         public static Text NotificationText;
         

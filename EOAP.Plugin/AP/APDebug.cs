@@ -25,6 +25,8 @@ namespace EOAP.Plugin.AP
         {
             ButtonVerySmall = GUILayout.Width(20f);
             ButtonMedium = GUILayout.Width(160f);
+
+            GUIStyle button = new GUIStyle();
         }
 
         private int _window;
@@ -422,6 +424,27 @@ namespace EOAP.Plugin.AP
             ShowSpriteName(APCanvasRipper.NotificationSprite);
             if (GUILayout.Button("Updates Refs"))
                 APCanvasRipper.SetupTownReferences();
+            GUILayout.EndVertical();
+            GUILayout.BeginVertical();
+            if (GUILayout.Button("Test Notification"))
+            {
+                switch(Random.Range(1, 3))
+                {
+                    default:
+                        APBehaviour.PushNotification("This is a test notification"); break;
+                    case 2:
+                        APBehaviour.PushNotification("<b>A</b> <i>test</i> <color=#ffcc00>notification</color>"); break;
+                }
+            }
+            GUILayout.EndVertical();
+            GUILayout.BeginVertical();
+            for (APCanvasRipper.SFX sfx = APCanvasRipper.SFX.SystemOk; sfx <= APCanvasRipper.SFX.ClearMap; ++sfx)
+            {
+                if (GUILayout.Button(sfx.ToString()))
+                {
+                    EO1.PlaySFX(sfx);
+                }
+            }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
             GUI.enabled = guiState;

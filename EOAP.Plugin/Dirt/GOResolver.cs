@@ -1,16 +1,19 @@
 ﻿using EOAP.Plugin;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Dirt.Hackit
 {
     public static class GOResolver
     {
         private static Dictionary<string, GameObject> s_rootObjectCache;
-
+        private static GameObject[] _sceneRootObjects;
+        private static int _activeScene;
         static GOResolver()
         {
             s_rootObjectCache = new Dictionary<string, GameObject>();
+            _activeScene = -1;
         }
 
         public static string GetPath(GameObject go)
@@ -41,8 +44,12 @@ namespace Dirt.Hackit
                     GDebug.LogError("Could not find component {0} on {1}", typeof(T).Name, targetObject.name);
                 }
             }
+
             return comp;
         }
+
+        public static void ResetScene() => _activeScene = -1;
+
         public static GameObject Resolve(string path)
         {
             string[] hierarchy = path.Split('.');
@@ -55,16 +62,44 @@ namespace Dirt.Hackit
 
             int index = 0;
 
+            if (_activeScene != SceneManager.GetActiveScene().buildIndex)
+            {
+                s_rootObjectCache.Clear();
+                _sceneRootObjects = GetSceneRootObjects();
+                _activeScene = SceneManager.GetActiveScene().buildIndex;
+            }
+
             if (s_rootObjectCache.TryGetValue(hierarchy[0], out GameObject current))
             {
                 index++;
             }
 
-            for(; index < hierarchy.Length; ++index)
+            for (; index < hierarchy.Length; ++index)
             {
                 if (index == 0)
                 {
-                    current = GameObject.Find(hierarchy[index]);
+                    bool found = false;
+                    for(int j = 0; !found && j < _sceneRootObjects.Length; ++j)
+                    {
+                        if (_sceneRootObjects[j].name == hierarchy[index])
+                        {
+                            current = _sceneRootObjects[j];
+                            found = true;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        GameObject[] dontDestroyObjects = GetDontDestroyOnLoadObjects();
+                        for(int j = 0; !found && j < dontDestroyObjects.Length; ++j)
+                        {
+                            if (dontDestroyObjects[j].name == hierarchy[index])
+                            {
+                                current = dontDestroyObjects[j];
+                                found = true;
+                            }
+                        }
+                    }
 
                     if (current != null)
                     {
@@ -83,7 +118,8 @@ namespace Dirt.Hackit
                 if (index > 0)
                 {
                     int j = 0;
-                    for(; j < current.transform.childCount; ++j)
+                    int childCount = current.transform.childCount;
+                    for(; j < childCount; ++j)
                     {
                         if (current.transform.GetChild(j).gameObject.name == hierarchy[index])
                         {
@@ -91,7 +127,7 @@ namespace Dirt.Hackit
                             break;
                         }
                     }
-                    if (j >= current.transform.childCount)
+                    if (j >= childCount)
                     {
                         GDebug.LogError("Invalid Hierarchy, unknown children {0}", hierarchy[index]);
                         return null;
@@ -102,5 +138,45 @@ namespace Dirt.Hackit
             return current;
         }
 
+
+        public static GameObject[] GetDontDestroyOnLoadObjects()
+        {
+            GameObject temp = null;
+            try
+            {
+                Il2CppSystem.Collections.Generic.List<GameObject> list = new Il2CppSystem.Collections.Generic.List<GameObject>();
+                temp = new GameObject();
+                Object.DontDestroyOnLoad(temp);
+                UnityEngine.SceneManagement.Scene dontDestroyOnLoad = temp.scene;
+                Object.DestroyImmediate(temp);
+                temp = null;
+
+                dontDestroyOnLoad.GetRootGameObjects(list);
+                GameObject[] gos = new GameObject[list.Count];
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    gos[i] = list[i];
+                }
+                return gos;
+            }
+            finally
+            {
+                if (temp != null)
+                    Object.DestroyImmediate(temp);
+            }
+        }
+
+
+        public static GameObject[] GetSceneRootObjects()
+        {
+            Il2CppSystem.Collections.Generic.List<GameObject> list = new Il2CppSystem.Collections.Generic.List<GameObject>();
+            SceneManager.GetActiveScene().GetRootGameObjects(list);
+            GameObject[] gos = new GameObject[list.Count];
+            for (int i = 0; i < list.Count; ++i)
+            {
+                gos[i] = list[i];
+            }
+            return gos;
+        }
     }
 }
