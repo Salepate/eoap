@@ -45,7 +45,6 @@ namespace EOAP.Plugin.AP
         public UIAction DrawConnectionMenu(Rect rect)
         {
             UIAction action = UIAction.None;
-
             GUILayout.BeginHorizontal(GUI.skin.box);
             GUILayout.Label("Server");
             GUILayout.Label(Hostname);

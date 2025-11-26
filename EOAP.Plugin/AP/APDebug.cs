@@ -39,9 +39,10 @@ namespace EOAP.Plugin.AP
             {
                 DrawGeneralDebugging,
                 DrawHierarchy,
-                DrawCanvasRipper,
+                DrawDataRipper,
+                DrawUI
             };
-            _windowNames = ["General", "Hierarchy", "Canvas Ripper"];
+            _windowNames = ["General", "Hierarchy", "Data Ripper", "UI"];
         }
 
         public void DrawWindow(Rect pos)
@@ -145,7 +146,7 @@ namespace EOAP.Plugin.AP
         // Window: Canvas Ripper
         //=============================================================
         private bool _includeInactives;
-        private void DrawCanvasRipper()
+        private void DrawDataRipper()
         {
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
@@ -188,17 +189,6 @@ namespace EOAP.Plugin.AP
             if (swapToInspector)
             {
                 SwapToWindow(1);
-            }
-        }
-
-        private void Ripper_GetRootObjects()
-        {
-            Il2CppSystem.Collections.Generic.List<GameObject> list = new Il2CppSystem.Collections.Generic.List<GameObject>();
-            SceneManager.GetActiveScene().GetRootGameObjects(list);
-            _rootObjects = new GameObject[list.Count];
-            for (int i = 0; i < list.Count; ++i)
-            {
-                _rootObjects[i] = list[i];
             }
         }
 
@@ -337,6 +327,7 @@ namespace EOAP.Plugin.AP
         {
             _inspectedObject = go;
             _inspectedPath = GOResolver.GetPath(go);
+            _page = 0;
             Hierarchy_BasicTestObjects(go);
         }
 
@@ -372,6 +363,7 @@ namespace EOAP.Plugin.AP
                 _page++;
             }
             GUILayout.EndHorizontal();
+            GUI.enabled = guiState;
         }
 
         private void Hierarchy_BasicTestObjects(GameObject go)
@@ -392,6 +384,7 @@ namespace EOAP.Plugin.AP
                         if ((cText = c.TryCast<Text>()) != null)
                         {
                             _additionalData.Add($"Text: {cText.text}");
+                            _additionalData.Add($"Font: {cText.font.name}");
                         }
                         else if ((cText2 = c.TryCast<TMP_Text>()) != null)
                         {
@@ -408,5 +401,59 @@ namespace EOAP.Plugin.AP
             }
             _inspectBasicComponents = foundComponents.ToArray();
         }
+
+        //=============================================================
+        // Window: Game UI
+        //=============================================================
+
+        private void DrawUI()
+        {
+            bool guiState = GUI.enabled;
+
+            GUILayout.BeginHorizontal();
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(200f));
+            GUILayout.Label("Canvas");
+            ShowActiveToggle(APCanvasRipper.TitleUI, "Title UI");
+            ShowActiveToggle(APCanvasRipper.GameHUD, "Game HUD");
+            ShowActiveToggle(APCanvasRipper.InnUI, "Inn");
+            GUILayout.EndVertical();
+            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.Label("Sprites");
+            ShowSpriteName(APCanvasRipper.NotificationSprite);
+            if (GUILayout.Button("Updates Refs"))
+                APCanvasRipper.SetupTownReferences();
+            GUILayout.EndVertical();
+            GUILayout.EndHorizontal();
+            GUI.enabled = guiState;
+        }
+
+
+        private void ShowActiveToggle(Component comp, string defaultName = "")
+        {
+            GameObject go = comp != null ? comp.gameObject : null;
+            ShowActiveToggle(go, defaultName);
+        }
+
+        private void ShowSpriteName(Sprite spr)
+        {
+            if (spr == null)
+                GUILayout.Label("Unloaded Sprite");
+            else
+                GUILayout.Label(spr.name);
+        }
+        private void ShowActiveToggle(GameObject go, string defaultName = "")
+        {
+            bool guiState = GUI.enabled;
+            bool goState = go != null ? go.activeSelf : false;
+            string objectName = defaultName ?? (go != null ? go.name : "Unknown Object");
+            string toggleName = $"{objectName} [{goState}]";
+            GUI.enabled = guiState && go != null;
+            if (GUILayout.Button(toggleName))
+            {
+                go.SetActive(!goState);
+            }
+            GUI.enabled = guiState;
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using EOAP.Plugin.AP;
+﻿using Dirt.Hackit;
+using EOAP.Plugin.AP;
 using HarmonyLib;
 using Newtonsoft.Json;
 using System;
@@ -10,7 +11,7 @@ namespace EOAP.Plugin.Behaviours
     public class APBehaviour : MonoBehaviour
     {
         public const float WindowHeight = 40f;
-        public const float DebugHeight = 120f;
+        public const float DebugHeight = 40f;
         public enum APState
         {
             Offline,
@@ -23,12 +24,13 @@ namespace EOAP.Plugin.Behaviours
         private EOPersistent _persistent;
         private bool _showDebug;
         private APUI _UI;
-        private System.Func<APUI.UIAction>[] _UIActions;
+        private System.Func<Rect, APUI.UIAction>[] _UIActions;
         private Dictionary<APUI.UIAction, System.Action> _actionMap;
         private APState _state;
 
 
         private static APBehaviour s_Instance;
+        private APDebug _debug;
 
 
         // API
@@ -56,7 +58,7 @@ namespace EOAP.Plugin.Behaviours
             _UI = new APUI();
             _UI.Hostname = connectionFile.Hostname;
             _UI.SlotName = connectionFile.Slotname;
-            _UIActions = new System.Func<APUI.UIAction>[2];
+            _UIActions = new System.Func<Rect, APUI.UIAction>[2];
             _UIActions[0] = _UI.DrawConnectionMenu; // Offline
             _UIActions[1] = _UI.DrawSessionMenu; // Connected
             // UI Actions
@@ -67,6 +69,9 @@ namespace EOAP.Plugin.Behaviours
             patcher.PatchAll();
             // tmp
             InControl.InputManager.Enabled = false;
+
+            // DBG
+            _debug = new APDebug();
         }
 
         private void Update()
@@ -79,42 +84,54 @@ namespace EOAP.Plugin.Behaviours
         {
             _UI.DrawNotificationScreen();
 
-            float uiHeight = _showDebug ? WindowHeight + DebugHeight : WindowHeight;
-            Rect debugRect = new Rect(10f, Screen.height - (uiHeight + 10f), Screen.width - 20f, uiHeight);
-            Rect toggleUIRect = debugRect;
-            toggleUIRect.width = 16f;
-            toggleUIRect.height = 16f;
-            toggleUIRect.y = debugRect.y - 16f;
+            float height = WindowHeight;
+            if (_showDebug)
+                height += DebugHeight;
+
+            APUI.UIAction action = APUI.UIAction.None;
+
+            Rect containerPanel = new Rect(10f, 10f, Screen.width - 20f, height);
+            Rect archipelagoPanel = containerPanel;
+            archipelagoPanel.height = WindowHeight;
+
+            Rect debugPanel = containerPanel;
+            debugPanel.y = archipelagoPanel.yMax;
+            debugPanel.height = DebugHeight;
+
+            Rect windowScreen = containerPanel;
+            windowScreen.y = containerPanel.yMax + 10f;
+            windowScreen.yMax = Screen.height - 10f;
+
+            Rect toggleRect = containerPanel;
+            toggleRect.width = 16f;
+            toggleRect.height = 16f;
+            archipelagoPanel.xMin = toggleRect.xMax;
 
 
-            GUI.BeginGroup(toggleUIRect, GUI.skin.box);
-            if (GUI.Button(new Rect(0f, 0f, 16f, 16f), _UI.ShowUI ? "-" : "+"))
+            if (GUI.Button(toggleRect, _UI.ShowUI ? "-" : "+"))
             {
                 _UI.ShowUI =  !_UI.ShowUI;
             }
-            GUI.EndGroup();
 
-
-            if (!_UI.ShowUI)
+            if (_UI.ShowUI)
             {
-                return;
+                int stateIndex = (int)_state;
+
+                StrippedUI.BeginArea(archipelagoPanel);
+                action = _UIActions[stateIndex](archipelagoPanel);
+                StrippedUI.EndArea();
+
+                if (_showDebug)
+                {
+                    _debug.DrawUI(debugPanel);
+                    _debug.DrawWindow(windowScreen);
+                }
             }
-
-            GUI.BeginGroup(debugRect, GUI.skin.box);
-            int stateIndex = (int)_state;
-            APUI.UIAction action = _UIActions[stateIndex]();
-
-            if (_showDebug)
-                ShowDebugUI();
-            GUI.EndGroup();
-
 
             if (_actionMap.TryGetValue(action, out Action uiAction))
             {
                 uiAction();
             }
-
-
         }
 
         // UI Actions
@@ -165,52 +182,6 @@ namespace EOAP.Plugin.Behaviours
                 GDebug.Log("Creating custom save file");
                 _persistent = new EOPersistent();
             }
-        }
-
-        // Debugging
-        private void ShowDebugUI()
-        {
-            GUILayout.BeginHorizontal();
-
-            GUILayout.BeginVertical();
-            if (GUILayout.Button("Toggle Debug Menu"))
-            {
-                DebugManager.JAOFCFFEELF.Open();
-            }
-
-            bool inputState = InControl.InputManager.Enabled;
-
-            if (GUILayout.Button("Block Inputs: " + (inputState.ToString())))
-            {
-                InControl.InputManager.Enabled = !inputState;
-            }
-            GUILayout.EndVertical();
-            GUILayout.BeginVertical();
-            bool guiState = GUI.enabled;
-            GUI.enabled = _session.Connected;
-            if (GUILayout.Button("Sync New Items"))
-            {
-                _session.SyncNewItems(_persistent, false);
-            }
-            GUI.enabled = guiState;
-            if (GUILayout.Button("Save Persistent"))
-            {
-                string persistentData = JsonConvert.SerializeObject(_persistent);
-                System.IO.File.WriteAllText(EOPersistent.GetFilePath(), persistentData);
-            }
-            GUILayout.EndVertical();
-
-            //GUILayout.BeginVertical();
-            //if (GUILayout.Button("Load DynDB"))
-            //{
-            //    Builder.Load("dyndb.json");
-            //}
-            //if (GUILayout.Button("Save DynDB"))
-            //{
-            //    Builder.Dump("dyndb.json");
-            //}
-            //GUILayout.EndVertical();
-            GUILayout.EndHorizontal();
         }
     }
 }
