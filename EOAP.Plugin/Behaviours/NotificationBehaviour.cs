@@ -40,6 +40,7 @@ namespace EOAP.Plugin.Behaviours
 
         public void ShowNotification(int notificationIndex = 0, float duration = 1f)
         {
+            _tr.SetAsLastSibling();
             gameObject.SetActive(true);
             _tr.anchoredPosition = new Vector2(_tr.sizeDelta.x + 10f, -10f - _tr.sizeDelta.y * notificationIndex);
             _startPosition = _tr.localPosition;
