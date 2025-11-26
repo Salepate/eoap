@@ -1,12 +1,6 @@
-﻿using Archipelago.MultiClient.Net.Helpers;
-using Archipelago.MultiClient.Net.Models;
-using EOAP.Plugin.AP;
+﻿using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
 using HarmonyLib;
-using Il2CppInterop.Runtime;
-using System;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace EOAP.Plugin.Patcher
 {
