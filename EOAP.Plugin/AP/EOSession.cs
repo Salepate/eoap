@@ -5,6 +5,7 @@ using Archipelago.MultiClient.Net.Models;
 using EOAP.Plugin.Behaviours;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace EOAP.Plugin.AP
 {
@@ -159,6 +160,7 @@ namespace EOAP.Plugin.AP
 
             // prepare fast memory for ingame patches
             EOMemory.PrepareMemory();
+            Dictionary<long, int> reverseMap = new Dictionary<long, int>();
             foreach(var shopLocKVP in EO1.ItemIDToName)
             {
                 long locID = Session.Locations.GetLocationIdFromName(EO1.WorldName, EO1.GetShopLocation(shopLocKVP.Key));
@@ -167,6 +169,21 @@ namespace EOAP.Plugin.AP
                     GDebug.Log("Flagging " + shopLocKVP.Value);
                     EOMemory.ShopLocations[shopLocKVP.Key] = true;
                 }
+                else
+                {
+                    reverseMap.Add(locID, shopLocKVP.Key);
+
+                }
+            }
+
+            System.Threading.Tasks.Task<Dictionary<long, ScoutedItemInfo>> req = Session.Locations.ScoutLocationsAsync(reverseMap.Keys.ToArray());
+            req.Wait();
+            Dictionary<long, ScoutedItemInfo> result = req.Result;
+            foreach(var hintKVP in result)
+            {
+                int itemIndex = reverseMap[hintKVP.Key];
+                ScoutedItemInfo itemHint = hintKVP.Value;
+                EOMemory.ShopHint[itemIndex] = itemHint.ItemDisplayName;
             }
         }
 

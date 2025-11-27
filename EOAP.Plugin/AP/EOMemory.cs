@@ -6,10 +6,12 @@ namespace EOAP.Plugin.AP
     {
         public static int ShopMenuItemIndex = -1;
         public static bool[] ShopLocations = System.Array.Empty<bool>();
+        public static string[] ShopHint = System.Array.Empty<string>();
 
         public static void PrepareMemory()
         {
             ShopLocations = EnumUtility.CreateArray<bool, ItemNoEnum.ITEM_NO>();
+            ShopHint = EnumUtility.CreateArray<string, ItemNoEnum.ITEM_NO>();
         }
 
         public static bool IsMissingLocation(ItemNoEnum.ITEM_NO no)
