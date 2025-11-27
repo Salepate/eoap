@@ -17,30 +17,15 @@ namespace EOAP.Plugin.Patcher
         {
             _persistent = APBehaviour.GetPersistent();
             _session = APBehaviour.GetSession();
-            GDebug.Log("iam doomed?");
             if (_session.Connected)
             {
                 GDebug.Log("Sync AP Data");
                 _session.LoadFlags(_persistent);
-                // connect callback
-                _session.Session.Items.ItemReceived += OnItemReceived;
             }
             else
             {
                 GDebug.Log("Not connected to AP, cannot restore items");
             }
-        }
-
-        private static void OnItemReceived(ReceivedItemsHelper helper)
-        {
-            //ItemInfo nextItem;
-            //while ( (nextItem = helper.PeekItem()) != null)
-            //{
-            //    _session.SyncItem(nextItem, false);
-
-            //    helper.DequeueItem();
-            //}
-            //_persistent.LastIndex = helper.AllItemsReceived.Count - 1;
         }
     }
 }

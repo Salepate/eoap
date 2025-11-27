@@ -1,8 +1,10 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
 using EOAP.Plugin.Behaviours;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,7 +18,6 @@ namespace EOAP.Plugin.AP
         public ArchipelagoSession Session { get; private set; }
 
         private List<long> _idsBuffer = new List<long>();
-
 
         public void SendLocation(params string[] locations)
         {
@@ -57,8 +58,19 @@ namespace EOAP.Plugin.AP
                 for (int i = 0; i < _idsBuffer.Count; ++i)
                     persistentData.AddLocation(_idsBuffer[i]);
             }
-
         }
+
+        public ItemInfo GetItemInfo(long itemID)
+        {
+            ReadOnlyCollection<ItemInfo> allItems = Session.Items.AllItemsReceived;
+            for (int i = 0; i < allItems.Count; ++i)
+            {
+                if (allItems[i].ItemId == itemID)
+                    return allItems[i];
+            }
+            return null;
+        }
+
 
         public void Start(string slotName, string hostname, int port)
         {
@@ -67,12 +79,14 @@ namespace EOAP.Plugin.AP
 
             ErrorMessage = string.Empty;
             Session = ArchipelagoSessionFactory.CreateSession(hostname, port);
+            Session.Items.ItemReceived += OnItemReceived;
             Session.MessageLog.OnMessageReceived += OnMessageReceived;
 
             System.Version worldVersion = new System.Version(0, 6, 4);
             LoginResult result;
             try
             {
+                APBehaviour.LoadPersistentData();
                 result = Session.TryConnectAndLogin("Etrian Odyssey HD", slotName, ItemsHandlingFlags.AllItems, requestSlotData: true, version: worldVersion);
             }
             catch(System.Exception e)
@@ -99,38 +113,35 @@ namespace EOAP.Plugin.AP
             Connected = result.Successful;
         }
 
-        private void OnMessageReceived(LogMessage message)
+
+        public long GetLocationId(string loc)
         {
-            if (message is ItemSendLogMessage sendLogMessage)
+            if (string.IsNullOrEmpty(loc))
             {
-                if (sendLogMessage is not HintItemSendLogMessage && sendLogMessage.IsSenderTheActivePlayer && !sendLogMessage.IsReceiverTheActivePlayer)
-                {
-                    string? itemName = sendLogMessage.Item.ItemName;
-                    string? messageText;
-                    string? otherPlayer = Session.Players.GetPlayerAlias(sendLogMessage.Receiver.Slot);
-                    messageText = $"Sent {itemName} to {otherPlayer}.";
-                    APBehaviour.PushNotification(messageText);
-                }
+                GDebug.Log("Invalid Location name");
+                return 0;
             }
+
+            long locid = Session.Locations.GetLocationIdFromName(EO1.WorldName, loc);
+            if (locid > 0)
+                return locid;
+
+            GDebug.Log("Location " + loc + " not found in AP World");
+            return 0;
         }
 
 
+
         // Sync (send/receive all locations already done)
-        public void SyncItem(ItemInfo item, bool silent)
+
+        private void SyncItem(EOPersistent persistent, ItemInfo item, bool silent)
         {
             if (!silent)
             {
                 APBehaviour.PushNotification($"Received {item.ItemDisplayName}", 3f);
             }
 
-            if (item.ItemId > (long)ItemNoEnum.ITEM_NO.ITEM_NOT && item.ItemId < (long)ItemNoEnum.ITEM_NO.ITEM_END)
-            {
-                GoldItem.AddPartyItem((ItemNoEnum.ITEM_NO)item.ItemId);
-            }
-            else
-            {
-                GDebug.Log("Unsupported Item (yet): " + item.ItemDisplayName + " (" + item.ItemId + ")");
-            }
+            persistent.PendingItems.Add(item.ItemId);
         }
 
         public void SyncNewItems(EOPersistent persistent, bool silent)
@@ -140,7 +151,7 @@ namespace EOAP.Plugin.AP
             for (int i = persistent.LastIndex + 1; i < received.Count; ++i)
             {
                 ItemInfo item = received[i];
-                SyncItem(item, silent);
+                SyncItem(persistent, item, silent);
                 persistent.LastIndex = i;
             }
         }
@@ -166,7 +177,6 @@ namespace EOAP.Plugin.AP
                 long locID = Session.Locations.GetLocationIdFromName(EO1.WorldName, EO1.GetShopLocation(shopLocKVP.Key));
                 if (Session.Locations.AllLocationsChecked.Contains(locID))
                 {
-                    GDebug.Log("Flagging " + shopLocKVP.Value);
                     EOMemory.ShopLocations[shopLocKVP.Key] = true;
                 }
                 else
@@ -187,20 +197,39 @@ namespace EOAP.Plugin.AP
             }
         }
 
-        public long GetLocationId(string loc)
+        // Multiclient Callbacks
+
+        
+        private void OnItemReceived(ReceivedItemsHelper helper)
         {
-            if (string.IsNullOrEmpty(loc))
+            EOPersistent persistent = APBehaviour.GetPersistent();
+
+            if (helper.Index - 1 <= persistent.LastIndex)
+                return;
+
+            ItemInfo nextItem;
+            while ((nextItem = helper.PeekItem()) != null)
             {
-                GDebug.Log("Invalid Location name");
-                return 0;
+                SyncItem(persistent, nextItem, false);
+                helper.DequeueItem();
             }
-
-            long locid = Session.Locations.GetLocationIdFromName(EO1.WorldName, loc);
-            if (locid > 0)
-                return locid;
-
-            GDebug.Log("Location " + loc + " not found in AP World");
-            return 0;
+            persistent.LastIndex = helper.AllItemsReceived.Count - 1;
         }
+
+        private void OnMessageReceived(LogMessage message)
+        {
+            if (message is ItemSendLogMessage sendLogMessage)
+            {
+                if (sendLogMessage is not HintItemSendLogMessage && sendLogMessage.IsSenderTheActivePlayer && !sendLogMessage.IsReceiverTheActivePlayer)
+                {
+                    string? itemName = sendLogMessage.Item.ItemName;
+                    string? messageText;
+                    string? otherPlayer = Session.Players.GetPlayerAlias(sendLogMessage.Receiver.Slot);
+                    messageText = $"Sent {itemName} to {otherPlayer}.";
+                    APBehaviour.PushNotification(messageText);
+                }
+            }
+        }
+
     }
 }

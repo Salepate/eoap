@@ -69,7 +69,7 @@ namespace EOAP.Plugin.Behaviours
             Harmony patcher = new Harmony("eaop.patch");
             patcher.PatchAll();
             // tmp
-            InControl.InputManager.Enabled = false;
+            //InControl.InputManager.Enabled = false;
 
             // DBG
             _debug = new APDebug();
@@ -159,6 +159,10 @@ namespace EOAP.Plugin.Behaviours
         // States Changes
         private void OnState_Connected()
         {
+        }
+
+        public static void LoadPersistentData()
+        {
             bool loaded = false;
             // load save
             try
@@ -166,20 +170,20 @@ namespace EOAP.Plugin.Behaviours
                 if (System.IO.File.Exists(EOPersistent.GetFilePath()))
                 {
                     string extraData = System.IO.File.ReadAllText(EOPersistent.GetFilePath());
-                    _persistent = JsonConvert.DeserializeObject<EOPersistent>(extraData);
+                    s_Instance._persistent = JsonConvert.DeserializeObject<EOPersistent>(extraData);
                     loaded = true;
                 }
             }
             catch(System.Exception e)
             {
                 GDebug.Log("Failed to load custom save");
-                _persistent = new EOPersistent();
+                s_Instance._persistent = new EOPersistent();
             }
 
             if (!loaded)
             {
                 GDebug.Log("Creating custom save file");
-                _persistent = new EOPersistent();
+                s_Instance._persistent = new EOPersistent();
             }
         }
     }
