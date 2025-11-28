@@ -79,25 +79,23 @@ namespace EOAP.Plugin.AP
 
             ErrorMessage = string.Empty;
             Session = ArchipelagoSessionFactory.CreateSession(hostname, port);
-            Session.Items.ItemReceived += OnItemReceived;
             Session.MessageLog.OnMessageReceived += OnMessageReceived;
 
             System.Version worldVersion = new System.Version(0, 6, 4);
             LoginResult result;
             try
             {
-                APBehaviour.LoadPersistentData();
                 result = Session.TryConnectAndLogin("Etrian Odyssey HD", slotName, ItemsHandlingFlags.AllItems, requestSlotData: true, version: worldVersion);
             }
             catch(System.Exception e)
             {
                 ErrorMessage += e.Message + "\n";
-                result = new LoginFailure("Exception"); // no idea why an exception message should be passed.
+                result = new LoginFailure("Exception");
             }
 
             if (!result.Successful)
             {
-                LoginFailure failure = (LoginFailure)result; // seriously wtf
+                LoginFailure failure = (LoginFailure)result;
                 for (int i = 0; i < failure.Errors.Length; ++i)
                 {
                     ErrorMessage += failure.Errors[i];
@@ -106,8 +104,9 @@ namespace EOAP.Plugin.AP
             }
             else
             {
-                LoginSuccessful success = (LoginSuccessful)result; // devs really need to study polymorphism use cases
-                GDebug.Log($"Connected to AP Slot {success.Slot}");
+                LoginSuccessful success = (LoginSuccessful)result;
+                EOConfig.LoadSessionConfiguration(success.SlotData);
+                Session.Items.ItemReceived += OnItemReceived;
             }
 
             Connected = result.Successful;

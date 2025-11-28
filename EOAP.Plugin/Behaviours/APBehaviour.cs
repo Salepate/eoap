@@ -1,4 +1,5 @@
-﻿using Dirt.Hackit;
+﻿using Archipelago.MultiClient.Net;
+using Dirt.Hackit;
 using EOAP.Plugin.AP;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -31,6 +32,7 @@ namespace EOAP.Plugin.Behaviours
 
         private static APBehaviour s_Instance;
         private APDebug _debug;
+        private string _persistentFileName;
 
 
         // API
@@ -159,17 +161,32 @@ namespace EOAP.Plugin.Behaviours
         // States Changes
         private void OnState_Connected()
         {
+            _persistentFileName = EOPersistent.GetFilePath(_session.Session.RoomState.Seed, _session.Session.ConnectionInfo.Slot);
+            LoadPersistentData();
         }
 
+        public static void SavePersistentData()
+        {
+            if (string.IsNullOrEmpty(s_Instance._persistentFileName))
+            {
+                GDebug.LogError("Not saving, missing data");
+                return;
+            }
+
+            EOPersistent persistent = GetPersistent();
+            string persistentData = JsonConvert.SerializeObject(persistent);
+            System.IO.File.WriteAllText(s_Instance._persistentFileName, persistentData);
+        }
         public static void LoadPersistentData()
         {
             bool loaded = false;
             // load save
             try
             {
-                if (System.IO.File.Exists(EOPersistent.GetFilePath()))
+                if (System.IO.File.Exists(s_Instance._persistentFileName))
                 {
-                    string extraData = System.IO.File.ReadAllText(EOPersistent.GetFilePath());
+                    GDebug.Log("Load persistent data: " + s_Instance._persistentFileName);
+                    string extraData = System.IO.File.ReadAllText(s_Instance._persistentFileName);
                     s_Instance._persistent = JsonConvert.DeserializeObject<EOPersistent>(extraData);
                     loaded = true;
                 }

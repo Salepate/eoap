@@ -8,7 +8,11 @@ namespace EOAP.Plugin.AP
     [System.Serializable]
     public class EOPersistent
     {
-        public static string GetFilePath() => Path.Combine(UnityEngine.Application.persistentDataPath, "eoap.json");
+        public static string GetFilePath(string seed, int slot)
+        {
+            string fileName = $"{seed}_{slot}.json";
+            return Path.Combine(UnityEngine.Application.persistentDataPath, fileName);
+        }
 
         public void AddLocation(long locID)
         {

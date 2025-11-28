@@ -12,9 +12,7 @@ namespace EOAP.Plugin.Patcher
     { 
         public static void Prefix()
         {
-            var persistent = APBehaviour.GetPersistent();
-            string persistentData = JsonConvert.SerializeObject(persistent);
-            System.IO.File.WriteAllText(EOPersistent.GetFilePath(), persistentData);
+            APBehaviour.SavePersistentData();
         } 
     }
 

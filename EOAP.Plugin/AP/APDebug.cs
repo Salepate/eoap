@@ -1,13 +1,9 @@
 ﻿using Dirt.Hackit;
 using EOAP.Plugin.Behaviours;
-using Il2CppInterop.Runtime.Runtime;
-using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace EOAP.Plugin.AP
@@ -128,7 +124,7 @@ namespace EOAP.Plugin.AP
             if (GUILayout.Button("Save Persistent"))
             {
                 string persistentData = JsonConvert.SerializeObject(persistent);
-                System.IO.File.WriteAllText(EOPersistent.GetFilePath(), persistentData);
+                APBehaviour.SavePersistentData();
             }
             GUILayout.EndVertical();
 
@@ -198,7 +194,7 @@ namespace EOAP.Plugin.AP
         // Window: Hierarchy Traversal
         //=============================================================
         private const int Pagination = 10;
-        private static readonly System.Type[] BasicComponents = [typeof(Camera), typeof(Canvas), typeof(Image), typeof(Text), typeof(TMP_Text), typeof(CanvasGroup)];
+        private static readonly System.Type[] BasicComponents = [typeof(Camera), typeof(Canvas), typeof(Image), typeof(Text), typeof(TMP_Text), typeof(CanvasGroup),typeof(Button)];
         private GameObject _inspectedObject;
         private int _page;
         private string _inspectedPath;
@@ -306,6 +302,15 @@ namespace EOAP.Plugin.AP
                 if (toggleGO)
                     _inspectedObject.SetActive(!_inspectedObject.activeSelf);
 
+                if (GUILayout.Button("Full Dump"))
+                {
+                    var comps = _inspectedObject.GetComponents<Component>();
+                    for(int i = 0; i < comps.Length; ++i)
+                    {
+                        GDebug.Log("Comp: " + comps[i].GetIl2CppType().Name);
+                    }
+                }
+
                 for(int i = 0; i < _inspectBasicComponents.Length; ++i)
                 {
                     GUILayout.Label(_inspectBasicComponents[i]);
@@ -412,12 +417,15 @@ namespace EOAP.Plugin.AP
         {
             bool guiState = GUI.enabled;
 
+
+
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(200f));
             GUILayout.Label("Canvas");
             ShowActiveToggle(APCanvasRipper.TitleUI, "Title UI");
             ShowActiveToggle(APCanvasRipper.GameHUD, "Game HUD");
             ShowActiveToggle(APCanvasRipper.InnUI, "Inn");
+            ShowActiveToggle(APCanvasRipper.InputTextWindow, "Input Text");
             GUILayout.EndVertical();
             GUILayout.BeginVertical(GUI.skin.box);
             GUILayout.Label("Sprites");
@@ -426,6 +434,13 @@ namespace EOAP.Plugin.AP
                 APCanvasRipper.SetupTownReferences();
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
+            if (GUILayout.Button("Test Keyboard"))
+            {
+                // Show Ingame Keyboard
+                //TextInput tpInput = Il2CppSystem.Activator.CreateInstance<TextInput>();
+                //tpInput.ShowKeyboard(null, null, 1, 1, true, true, "ok");
+                APCanvasRipper.InputTextWindow.Open(string.Empty, string.Empty, 64);
+            }
             if (GUILayout.Button("Test Notification"))
             {
                 switch(Random.Range(1, 3))
