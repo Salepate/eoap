@@ -1,6 +1,12 @@
 ﻿using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
 using HarmonyLib;
+using Il2CppSystem.Runtime.InteropServices;
+using MonoMod.RuntimeDetour;
+using MonoMod.Utils;
+using Steam.ButtonInput;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace EOAP.Plugin.Patcher
 {
@@ -25,6 +31,7 @@ namespace EOAP.Plugin.Patcher
                 GDebug.Log("Not connected to AP, cannot restore items");
             }
         }
+
         private static void Postfix()
         {
             if (!_ripped)
@@ -33,7 +40,11 @@ namespace EOAP.Plugin.Patcher
                 _ripped = true;
                 APBehaviour.UI.CreateNotificationSystem();
             }
-            //rectTr.anchoredPosition = new Vector2(rect.width - rectTr.sizeDelta.x - 10f, rect.height * 0.5f - rectTr.sizeDelta.y);
+        }
+        public static void OhYeah(UIButton button)
+        {
+            GDebug.Log("OH NONONONO");
+            GDebug.Log("button: " + (button != null).ToString());
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net;
 using Dirt.Hackit;
 using EOAP.Plugin.AP;
+using EOAP.Plugin.Patcher;
 using HarmonyLib;
 using Newtonsoft.Json;
 using System;
@@ -34,6 +35,7 @@ namespace EOAP.Plugin.Behaviours
         private APDebug _debug;
         private string _persistentFileName;
 
+        private List<Harmony> _patchers;
 
         // API
         public static APUI UI => s_Instance._UI;
@@ -68,11 +70,10 @@ namespace EOAP.Plugin.Behaviours
             _actionMap = new Dictionary<APUI.UIAction, Action>();
             _actionMap.Add(APUI.UIAction.Connect, StartSession);
             // Harmony Stuff
+            _patchers = new List<Harmony>();
             Harmony patcher = new Harmony("eaop.patch");
             patcher.PatchAll();
-            // tmp
-            //InControl.InputManager.Enabled = false;
-
+            _patchers.Add(patcher);
             // DBG
             _debug = new APDebug();
         }
@@ -162,6 +163,15 @@ namespace EOAP.Plugin.Behaviours
         private void OnState_Connected()
         {
             _persistentFileName = EOPersistent.GetFilePath(_session.Session.RoomState.Seed, _session.Session.ConnectionInfo.Slot);
+
+            //
+            if (EOConfig.ShopSanity)
+            {
+                Harmony patcher = new Harmony("feature.shopsanity");
+                ShopsanityFeature.Patch(patcher);
+                _patchers.Add(patcher);
+            }
+
             LoadPersistentData();
         }
 

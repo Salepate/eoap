@@ -17,7 +17,6 @@ namespace EOAP.Plugin.AP
                 {
                     if (s_Configurations.TryGetValue(entry.Key, out var setter))
                     {
-                        GDebug.Log("set {0} to {1}", entry.Key, entry.Value);
                         setter((long)entry.Value);
                     }
                     else
