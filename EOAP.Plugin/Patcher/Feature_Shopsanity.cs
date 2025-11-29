@@ -81,6 +81,7 @@ namespace EOAP.Plugin.Patcher
                     string hint = EOMemory.ShopHint[itemID] ?? $"AP Item {locID}";
                     item.CHMMJIGJPPC = hint;
                     item.CFMADGGDPDB = ItemType.eITEM_KIND.ITEM_KIND_ETC;
+                    item.PFDNJNEFKMK = true;
                 }
             }
         }
