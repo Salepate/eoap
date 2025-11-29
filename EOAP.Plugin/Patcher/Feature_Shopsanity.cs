@@ -40,7 +40,8 @@ namespace EOAP.Plugin.Patcher
                 if (!persistent.CompleteLocations.Contains(locID))
                 {
                     GoldItem.GetBasicItemData((ITEM_NO)itemID, out GoldItem.BASIC_ITEM_DATA itemData);
-                    sendLoc = GoldItem.PayGold(itemData.GMDGMCMPOHE);
+                    uint price = Item_GetPrice.GetNewPrice(itemData.GMDGMCMPOHE);
+                    sendLoc = GoldItem.PayGold(price);
                     invokeOriginal = false; // no buy
                 }
 
