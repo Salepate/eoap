@@ -34,7 +34,7 @@ namespace EOAP.Plugin.AP
             _notificationPool = new Queue<NotificationBehaviour>();
             PendingNotifications = new Queue<Notification>();
             _time = 0f;
-            ShowUI = true;
+            ShowUI = false;
         }
 
         public void Update(float deltaTime)
@@ -54,15 +54,16 @@ namespace EOAP.Plugin.AP
         {
             UIAction action = UIAction.None;
             GUILayout.BeginHorizontal(GUI.skin.box);
-            GUILayout.Label("Server");
-            GUILayout.Label(Hostname);
+            GUILayout.Label("Server: ", GUILayout.Width(50f));
+            GUILayout.Label(Hostname, GUI.skin.box, GUILayout.Width(150f));
             // Crash (Stripped calls)
             //Hostname = GUILayout.TextField(Hostname, GUILayout.Width(200f));
-            GUILayout.Label("Slot");
-            GUILayout.Label(SlotName);
+            GUILayout.Label("Slot:", GUILayout.Width(40f));
+            GUILayout.Label(SlotName, GUI.skin.box, GUILayout.Width(150f));
+            GUILayout.Label("Password: No", GUILayout.Width(90f));
             //SlotName =  GUILayout.TextField(SlotName, GUILayout.Width(120f));
 
-            if (GUILayout.Button("Connect"))
+            if (GUILayout.Button("Connect", GUILayout.Width(80f)))
             {
                 if (Hostname.Contains(":"))
                 {

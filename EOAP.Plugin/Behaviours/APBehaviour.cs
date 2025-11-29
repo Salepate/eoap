@@ -114,21 +114,25 @@ namespace EOAP.Plugin.Behaviours
             if (GUI.Button(toggleRect, _UI.ShowUI ? "-" : "+"))
             {
                 _UI.ShowUI =  !_UI.ShowUI;
+                InControl.InputManager.Enabled = !_UI.ShowUI;
             }
 
-            if (_UI.ShowUI)
+            if (_UI.ShowUI && !InControl.InputManager.Enabled)
+                InControl.InputManager.Enabled = false;
+
+
+            if (_state != APState.Connected || _UI.ShowUI)
             {
                 int stateIndex = (int)_state;
-
                 StrippedUI.BeginArea(archipelagoPanel);
                 action = _UIActions[stateIndex](archipelagoPanel);
                 StrippedUI.EndArea();
+            }
 
-                if (_showDebug)
-                {
-                    _debug.DrawUI(debugPanel);
-                    _debug.DrawWindow(windowScreen);
-                }
+            if (_UI.ShowUI && _showDebug)
+            {
+                _debug.DrawUI(debugPanel);
+                _debug.DrawWindow(windowScreen);
             }
 
             if (_actionMap.TryGetValue(action, out Action uiAction))
@@ -180,7 +184,7 @@ namespace EOAP.Plugin.Behaviours
         {
             if (string.IsNullOrEmpty(s_Instance._persistentFileName))
             {
-                GDebug.LogError("Not saving, missing data");
+                GDebug.LogError("Not saving, persistent file name not set");
                 return;
             }
 

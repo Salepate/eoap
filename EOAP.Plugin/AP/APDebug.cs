@@ -66,6 +66,8 @@ namespace EOAP.Plugin.AP
 
             if (GUILayout.Button("Game Debug"))
             {
+                APBehaviour.UI.ShowUI = false;
+                InControl.InputManager.Enabled = true;
                 DebugManager.JAOFCFFEELF.Open();
             }
 
@@ -89,11 +91,10 @@ namespace EOAP.Plugin.AP
             if (_window != newWindow)
             {
                 _window = newWindow;
-                InControl.InputManager.enabled = false;
             }
             else
             {
-                _window = -1;
+                APBehaviour.UI.ShowUI = false;
                 InControl.InputManager.enabled = true;
             }
         }
@@ -105,14 +106,6 @@ namespace EOAP.Plugin.AP
         {
             EOSession session = APBehaviour.GetSession();
             EOPersistent persistent = APBehaviour.GetPersistent();
-            GUILayout.BeginVertical(GUI.skin.box);
-            bool inputState = InControl.InputManager.Enabled;
-
-            if (GUILayout.Button("Block Inputs: " + (inputState.ToString())))
-            {
-                InControl.InputManager.Enabled = !inputState;
-            }
-            GUILayout.EndVertical();
             GUILayout.BeginVertical();
             bool guiState = GUI.enabled;
             GUI.enabled = session.Connected;
