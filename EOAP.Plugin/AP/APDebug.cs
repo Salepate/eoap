@@ -1,5 +1,7 @@
 ﻿using Dirt.Hackit;
 using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.DB;
+using Master;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using TMPro;
@@ -102,11 +104,13 @@ namespace EOAP.Plugin.AP
         //=============================================================
         // Window: General Debugging 
         //=============================================================
+        private static int _lastActivatedFlag = 0;
         private void DrawGeneralDebugging()
         {
             EOSession session = APBehaviour.GetSession();
             EOPersistent persistent = APBehaviour.GetPersistent();
-            GUILayout.BeginVertical();
+            GUILayout.BeginHorizontal();
+            GUILayout.BeginVertical(GUILayout.Width(200f));
             bool guiState = GUI.enabled;
             GUI.enabled = session.Connected;
             if (GUILayout.Button("Sync New Items"))
@@ -120,17 +124,41 @@ namespace EOAP.Plugin.AP
                 APBehaviour.SavePersistentData();
             }
             GUILayout.EndVertical();
+            GUILayout.BeginVertical(GUILayout.Width(200f));
+            GUI.skin.label.fontStyle = FontStyle.Bold;
+            GUILayout.Label("Flags");
+            GUI.skin.label.fontStyle = FontStyle.Normal;
+            GUILayout.Label($"Last Activated Flag: {_lastActivatedFlag}");
+            if (GUILayout.Button("Reset All Known Flags"))
+            {
+                var flags = Builder.GetTable("Flags");
+                for (int i = 0; i < flags.Count; ++i)
+                    EventFlagTbl.SetEventFlag(flags[i].ID, false);
+            }
 
-            //GUILayout.BeginVertical();
-            //if (GUILayout.Button("Load DynDB"))
-            //{
-            //    Builder.Load("dyndb.json");
-            //}
-            //if (GUILayout.Button("Save DynDB"))
-            //{
-            //    Builder.Dump("dyndb.json");
-            //}
-            //GUILayout.EndVertical();
+            if (GUILayout.Button($"Show Flags in Console: [{EOConfig.PrintActivatedFlags}]"))
+            {
+                EOConfig.PrintActivatedFlags = !EOConfig.PrintActivatedFlags;
+            }
+            GUILayout.EndVertical();
+
+
+            GUILayout.BeginVertical(GUILayout.Width(200f));
+            if (GUILayout.Button("Save DynDB"))
+            {
+                Builder.Dump(EOItems.DynDBPath);
+            }
+            GUILayout.EndVertical();
+            GUILayout.BeginVertical();
+            GUILayout.EndVertical();
+            GUILayout.EndHorizontal();
+        }
+
+        public static void PrintActivateFlag(int flagID)
+        {
+            _lastActivatedFlag = flagID;
+            if (EOConfig.PrintActivatedFlags)
+                GDebug.Log($"Activated Flag {flagID}");
         }
 
         //=============================================================

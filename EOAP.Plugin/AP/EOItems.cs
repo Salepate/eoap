@@ -7,7 +7,11 @@ namespace EOAP.Plugin.AP
     {
         public const string DynDBPath = "Bepinex/plugins/EOAPResources/dyndb.json";
 
+        public const string ItemTable = "Items";
+        public const string FlagTable = "Flags";
+
         public static readonly Dictionary<int, string> GameItems = new Dictionary<int, string>() {};
+        public static readonly Dictionary<int, string> FlagLocations = new Dictionary<int, string>();
 
         public static Dictionary<long, System.Action<long>> CustomItems = new Dictionary<long, System.Action<long>>()
         {
@@ -28,6 +32,7 @@ namespace EOAP.Plugin.AP
         {
             Builder.Load(DynDBPath);
             List<Entry> itemTbl = Builder.GetTable("Items");
+            List<Entry> flagTbl = Builder.GetTable("Flags");
             if (itemTbl == null)
             {
                 GDebug.LogError("cannot load item db");
@@ -53,6 +58,27 @@ namespace EOAP.Plugin.AP
 
                 int delta = GameItems.Count - curItemCount;
                 GDebug.Log($"Registered {delta} items");
+            }
+
+            if (flagTbl == null)
+            {
+                GDebug.LogError("Unable to load flag db");
+            }
+            else
+            {
+                for(int i = 0; i< flagTbl.Count; ++i)
+                {
+                    Entry entry = flagTbl[i];
+
+                    if (entry.Data == null || entry.Data.Length < 1)
+                        continue;
+
+                    if (string.IsNullOrEmpty(entry.Data[0]))
+                        continue;
+                    FlagLocations.Add(entry.ID, entry.Data[0]);
+                }
+                GDebug.Log($"Registered {FlagLocations.Count} flags");
+
             }
         }
 

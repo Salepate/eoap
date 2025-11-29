@@ -4,6 +4,9 @@ namespace EOAP.Plugin.AP
 {
     public static class EOConfig
     {
+        // DBG Configuration
+        public static bool PrintActivatedFlags = false;
+        // YAML Configuration
         public static int StartingEntal = 1000; // default values
         public static bool ShopSanity = false;
 

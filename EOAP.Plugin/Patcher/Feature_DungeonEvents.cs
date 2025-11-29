@@ -1,0 +1,32 @@
+﻿using EOAP.Plugin.AP;
+using EOAP.Plugin.Behaviours;
+using HarmonyLib;
+using Master;
+
+namespace EOAP.Plugin.Patcher
+{
+    //[HarmonyPatch(typeof(EventFlagTbl), nameof(EventFlagTbl.GetEventFlag))]
+    //public class FlagDB
+    //{
+    //    public static void Postfix(bool __result, int IINBFPLGLMN)
+    //    {
+    //        Builder.Push("Flags", IINBFPLGLMN);
+    //    }
+    //}
+
+    [HarmonyPatch(typeof(EventFlagTbl), nameof(EventFlagTbl.SetEventFlag))]
+    public class EventFlagTbl_SetEventFlag
+    {
+        public static void Postfix(int IINBFPLGLMN, bool LHIBOLMPPOI)
+        {
+            if (LHIBOLMPPOI)
+            {
+                if (EOItems.FlagLocations.TryGetValue(IINBFPLGLMN, out string locStr))
+                {
+                    APBehaviour.GetSession().SendLocation(locStr);
+                }
+                APDebug.PrintActivateFlag(IINBFPLGLMN);
+            }
+        }
+    }
+}

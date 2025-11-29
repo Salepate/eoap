@@ -10767,6 +10767,16 @@
           "ITEM_END"
         ]
       }
+    ],
+    "Flags": [
+      {
+        "ID": 126,
+        "Data": [ "B1F Main - Event Red Fruit" ]
+      },
+      {
+        "ID": 127,
+        "Data": [ "B1F Main - Moles Whitestone"]
+      }
     ]
   }
 }
