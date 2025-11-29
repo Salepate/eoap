@@ -7,11 +7,20 @@ namespace EOAP.Plugin.DB
 {
     public static class Builder
     {
-        private static DynDB m_DB;
+        private static DynDB s_DB;
         private  static JsonConverter m_Converter;
         static Builder()
         {
-            m_DB = new DynDB();
+            s_DB = new DynDB();
+        }
+
+        public static List<Entry> GetTable(string tbl)
+        {
+            if (s_DB != null)
+            {
+                return s_DB.GetTable(tbl);
+            }
+            return null;
         }
 
         public static void Load(string path)
@@ -19,7 +28,7 @@ namespace EOAP.Plugin.DB
             if (File.Exists(path))
             {
                 string content = File.ReadAllText(path);
-                m_DB = JsonConvert.DeserializeObject<DynDB>(content);
+                s_DB = JsonConvert.DeserializeObject<DynDB>(content);
                 GDebug.Log("loaded dyndb");
             }
             else
@@ -29,20 +38,20 @@ namespace EOAP.Plugin.DB
         }
         public static void Dump(string path)
         {
-            m_DB.SortByID();
-            string jsonDB = JsonConvert.SerializeObject(m_DB, Formatting.Indented);
+            s_DB.SortByID();
+            string jsonDB = JsonConvert.SerializeObject(s_DB, Formatting.Indented);
             File.WriteAllText(path, jsonDB);
             int entries = 0;
-            foreach(var tbl in m_DB.Tables)
+            foreach(var tbl in s_DB.Tables)
             {
                 entries += tbl.Value.Count;
             }
-            GDebug.Log($"saved dyndb / tables : {m_DB.Tables.Count} / totale entries {entries}");
+            GDebug.Log($"saved dyndb / tables : {s_DB.Tables.Count} / totale entries {entries}");
         }
 
         public static void Push(string db, int id, params string[] additionalData)
         {
-            List<Entry> tbl = m_DB.GetTable(db);
+            List<Entry> tbl = s_DB.GetTable(db);
             if (!DynDB.GetEntry(tbl, id, out int tblIndex))
             {
                 tbl.Add(new Entry() { ID = id, Data = additionalData });

@@ -119,6 +119,11 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="EOAPResources\dyndb.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy $(OutputPath) C:\Games\Steam\steamapps\common\EOHD\BepInEx\plugins\ /i /y" />
   </Target>

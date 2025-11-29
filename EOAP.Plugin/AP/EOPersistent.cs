@@ -38,7 +38,11 @@ namespace EOAP.Plugin.AP
             {
                 GoldItem.AddPartyItem((ItemNoEnum.ITEM_NO)itemIndex);
             }
-            else
+            else if (EOItems.CustomItems.TryGetValue(itemIndex, out var customAddAction))
+            {
+                customAddAction(itemIndex);
+            }
+            else 
             {
                 ItemInfo item = APBehaviour.GetSession().GetItemInfo(itemIndex);
                 GDebug.Log($"Unsupported Item {item.ItemDisplayName}");

@@ -80,7 +80,6 @@ namespace EOAP.Plugin.AP
             ErrorMessage = string.Empty;
             Session = ArchipelagoSessionFactory.CreateSession(hostname, port);
             Session.MessageLog.OnMessageReceived += OnMessageReceived;
-
             System.Version worldVersion = new System.Version(0, 6, 4);
             LoginResult result;
             try
@@ -171,9 +170,12 @@ namespace EOAP.Plugin.AP
             // prepare fast memory for ingame patches
             EOMemory.PrepareMemory();
             Dictionary<long, int> reverseMap = new Dictionary<long, int>();
-            foreach(var shopLocKVP in EO1.ItemIDToName)
+            foreach(var shopLocKVP in EOItems.GameItems)
             {
                 long locID = Session.Locations.GetLocationIdFromName(EO1.WorldName, EO1.GetShopLocation(shopLocKVP.Key));
+                if (locID < 0)
+                    continue;
+
                 if (Session.Locations.AllLocationsChecked.Contains(locID))
                 {
                     EOMemory.ShopLocations[shopLocKVP.Key] = true;
@@ -181,7 +183,6 @@ namespace EOAP.Plugin.AP
                 else
                 {
                     reverseMap.Add(locID, shopLocKVP.Key);
-
                 }
             }
 

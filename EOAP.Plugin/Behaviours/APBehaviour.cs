@@ -58,7 +58,8 @@ namespace EOAP.Plugin.Behaviours
             _showDebug = true;
             _state = APState.Offline;
             _session = new EOSession();
-
+            // DB 
+            EOItems.LoadDatabase();
             // UI Views
             _UI = new APUI();
             _UI.Hostname = connectionFile.Hostname;
