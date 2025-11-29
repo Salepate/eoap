@@ -215,7 +215,7 @@ namespace EOAP.Plugin.Behaviours
 
             if (!loaded)
             {
-                GDebug.LogError("Creating custom save file");
+                GDebug.Log("Creating custom save file");
                 s_Instance._persistent = new EOPersistent();
             }
         }
