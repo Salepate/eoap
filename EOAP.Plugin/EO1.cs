@@ -1,4 +1,5 @@
-﻿using EOAP.Plugin.AP;
+﻿using Archipelago.MultiClient.Net.Models;
+using EOAP.Plugin.AP;
 using System.Collections.Generic;
 
 namespace EOAP.Plugin
@@ -31,7 +32,11 @@ namespace EOAP.Plugin
         public static string GetShopLocation(int itemID)
         {
             if (EOItems.GameItems.TryGetValue(itemID, out string itemName))
+            {
+                if (Item.IsMedicine((ItemNoEnum.ITEM_NO)itemID))
+                    return string.Format("Apothecary - {0}", itemName);
                 return string.Format("Shop - {0}", itemName);
+            }
             return string.Empty;
         }
 
