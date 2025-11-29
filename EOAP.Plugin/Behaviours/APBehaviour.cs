@@ -208,13 +208,14 @@ namespace EOAP.Plugin.Behaviours
             }
             catch(System.Exception e)
             {
-                GDebug.Log("Failed to load custom save");
+                GDebug.LogError("Failed to load custom save");
+                GDebug.LogError(e.Message);
                 s_Instance._persistent = new EOPersistent();
             }
 
             if (!loaded)
             {
-                GDebug.Log("Creating custom save file");
+                GDebug.LogError("Creating custom save file");
                 s_Instance._persistent = new EOPersistent();
             }
         }
