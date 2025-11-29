@@ -4,7 +4,15 @@
 
 This is a work in progress.<br/>
 Require to downgrade EO: HD to the first version<br/>
-[AP World (Require AP 0.6.5)](https://github.com/wolicodes/Archipelago/tree/eo1-hd)
+[AP World](https://github.com/wolicodes/Archipelago/tree/eo1-hd)
+
+## Archipelago Features
+
+* Shopsanity
+* Treasure Box randomizer
+
+## Other Features
+* Custom debug menu and native game debug menu access
 
 ## Licensing
 
@@ -12,16 +20,28 @@ There is no Licence at the the moment. <br/>
 No one may reproduce, distribute or create derivative work
 
 ## Building
+
 * Run Bepinex 6-x (ClrCore Runtime) Once, close EOHD
 * Update Path for all references in .csproj if steam is installed elsewhere (probably)
   * This path C:\Games\Steam\steamapps\common\EOHD\BepInEx\interop\
-* Edit APUI.cs (change hostname and slotname)
 
 ## Testing
 
-* Download a release OR
-* Publish, copy content in bepinex plugins folder
+* Get Latest Release
+* Copy Full zip in to game folder or Plugin zip into Bepinex/plugins
+* Edit ap_configuration.json (game root folder) to set your server address and slot name
+
+## Limitations
+* Disregard other mods, should be used as a standalone
+* Quicksave will also save world data so you might loose items
+* Connect before loading save (will be fixed)
+* No game inputs override found yet, so connection data is edited in json
 
 ## Hierarchy
 
 * EOAP.Plugin - .NET Plugin for EO HD
+
+## Credits
+
+* Woli (world maintainer)
+* Seph (insights/message system)
