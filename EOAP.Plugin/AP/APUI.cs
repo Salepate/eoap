@@ -40,7 +40,7 @@ namespace EOAP.Plugin.AP
             _notificationPool = new Queue<NotificationBehaviour>();
             PendingNotifications = new Queue<Notification>();
             _time = 0f;
-            ShowUI = false;
+            ShowUI = true;
         }
 
         public void Update(float deltaTime)
@@ -107,6 +107,11 @@ namespace EOAP.Plugin.AP
                         action = UIAction.Connect;
                     }
                 }
+            }
+
+            if (GUILayout.Button("Edit Auth", GUILayout.Width(80f)))
+            {
+                System.Diagnostics.Process.Start("notepad.exe", APConnection.GetFilePath());
             }
 
             GUILayout.EndHorizontal();

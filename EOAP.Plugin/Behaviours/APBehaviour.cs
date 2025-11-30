@@ -84,16 +84,19 @@ namespace EOAP.Plugin.Behaviours
             _patchers.Add(patcher);
             // DBG
             _debug = new APDebug();
+
+            InControl.InputManager.Enabled = false;
         }
 
         private void OnApplicationFocus(bool focus)
         {
-            if (focus && (_session == null || !_session.Connected))
+            if (focus && (_session == null || !_session.Connected) && _UI != null)
             {
                 APConnection connectionFile = APConnection.LoadConnectionFile();
                 _UI.Hostname = connectionFile.Hostname;
                 _UI.SlotName = connectionFile.Slotname;
                 _UI.Password = connectionFile.Password;
+                InControl.InputManager.Enabled = false;
             }
         }
 
@@ -185,6 +188,8 @@ namespace EOAP.Plugin.Behaviours
         // States Changes
         private void OnState_Connected()
         {
+            _debug.SwapToWindow(-1);
+            UI.ShowUI = false;
             _persistentFileName = EOPersistent.GetFilePath(_session.Session.RoomState.Seed, _session.Session.ConnectionInfo.Slot);
 
             //

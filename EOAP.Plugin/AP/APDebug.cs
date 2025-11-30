@@ -34,15 +34,49 @@ namespace EOAP.Plugin.AP
 
         public APDebug()
         {
-            _window = -1;
+            _window = 4;
             _windows = new System.Action[]
             {
                 DrawGeneralDebugging,
                 DrawHierarchy,
                 DrawDataRipper,
-                DrawUI
+                DrawUI,
+                DrawWait,
             };
             _windowNames = ["General", "Hierarchy", "Data Ripper", "UI"];
+        }
+
+        private void DrawWait()
+        {
+            bool ignoreWait = false;
+
+            var align = GUI.skin.label.alignment;
+            int fontSize = GUI.skin.label.fontSize;
+            GUI.skin.label.fontSize = 48;
+            GUI.skin.label.fontStyle = FontStyle.Bold;
+            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+            GUILayout.Label(string.Empty);
+            GUILayout.Label(string.Empty);
+            GUILayout.Label("Connect to Archipelago First", GUILayout.Height(60f));
+            GUILayout.Label(string.Empty);
+            GUILayout.Label(string.Empty);
+
+
+            var button = GUI.skin.button;
+            int btnFntSize = button.fontSize;
+            button.fontSize = 48;
+            button.fontStyle = FontStyle.Bold;
+            ignoreWait = GUILayout.Button("Ignore", GUILayout.Height(60));
+            button.fontSize = btnFntSize;
+            button.fontStyle = FontStyle.Normal;
+            GUI.skin.label.fontSize = fontSize;
+            GUI.skin.label.fontStyle = FontStyle.Normal;
+            GUI.skin.label.alignment = align;
+
+            if (ignoreWait)
+            {
+                _window = -1;
+            }
         }
 
         public void DrawWindow(Rect pos)
@@ -88,7 +122,7 @@ namespace EOAP.Plugin.AP
                 
         }
 
-        private void SwapToWindow(int newWindow)
+        public void SwapToWindow(int newWindow)
         {
             if (_window != newWindow)
             {
