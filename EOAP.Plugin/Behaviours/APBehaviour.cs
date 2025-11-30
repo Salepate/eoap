@@ -97,7 +97,8 @@ namespace EOAP.Plugin.Behaviours
                 _UI.Hostname = connectionFile.Hostname;
                 _UI.SlotName = connectionFile.Slotname;
                 _UI.Password = connectionFile.Password;
-                InControl.InputManager.Enabled = false;
+                if (_UI.ShowUI)
+                    InControl.InputManager.Enabled = false;
             }
         }
 
