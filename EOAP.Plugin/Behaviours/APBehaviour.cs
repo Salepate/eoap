@@ -12,8 +12,8 @@ namespace EOAP.Plugin.Behaviours
 {
     public class APBehaviour : MonoBehaviour
     {
-        public const float WindowHeight = 40f;
-        public const float DebugHeight = 40f;
+        public const float WindowHeight = 28f;
+        public const float DebugHeight = 28f;
         public enum APState
         {
             Offline,
@@ -51,6 +51,11 @@ namespace EOAP.Plugin.Behaviours
 
         private void Start()
         {
+            if (!APConnection.FileExists)
+            {
+                APConnection.CreateDefaultSaveFile();
+            }
+
             APConnection connectionFile = APConnection.LoadConnectionFile();
             _persistent = new EOPersistent();
             s_Instance = this;
@@ -64,6 +69,7 @@ namespace EOAP.Plugin.Behaviours
             _UI = new APUI();
             _UI.Hostname = connectionFile.Hostname;
             _UI.SlotName = connectionFile.Slotname;
+            _UI.Password = connectionFile.Password;
             _UIActions = new System.Func<Rect, APUI.UIAction>[2];
             _UIActions[0] = _UI.DrawConnectionMenu; // Offline
             _UIActions[1] = _UI.DrawSessionMenu; // Connected
@@ -78,6 +84,17 @@ namespace EOAP.Plugin.Behaviours
             _patchers.Add(patcher);
             // DBG
             _debug = new APDebug();
+        }
+
+        private void OnApplicationFocus(bool focus)
+        {
+            if (focus && (_session == null || !_session.Connected))
+            {
+                APConnection connectionFile = APConnection.LoadConnectionFile();
+                _UI.Hostname = connectionFile.Hostname;
+                _UI.SlotName = connectionFile.Slotname;
+                _UI.Password = connectionFile.Password;
+            }
         }
 
         private void Update()
@@ -107,8 +124,8 @@ namespace EOAP.Plugin.Behaviours
             windowScreen.yMax = Screen.height - 10f;
 
             Rect toggleRect = containerPanel;
-            toggleRect.width = 16f;
-            toggleRect.height = 16f;
+            toggleRect.width = WindowHeight;
+            toggleRect.height = WindowHeight;
             archipelagoPanel.xMin = toggleRect.xMax;
 
 
@@ -125,7 +142,7 @@ namespace EOAP.Plugin.Behaviours
             if (_state != APState.Connected || _UI.ShowUI)
             {
                 int stateIndex = (int)_state;
-                StrippedUI.BeginArea(archipelagoPanel);
+                StrippedUI.BeginArea(archipelagoPanel, GUI.skin.box);
                 action = _UIActions[stateIndex](archipelagoPanel);
                 StrippedUI.EndArea();
             }

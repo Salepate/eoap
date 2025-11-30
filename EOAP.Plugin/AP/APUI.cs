@@ -21,6 +21,7 @@ namespace EOAP.Plugin.AP
         private Queue<NotificationBehaviour> _notificationPool;
         private bool[] _notificationSlots;
         public const int ConcurrentNotifications = 10;
+        public string Password { get; set; }
         public string Hostname { get; set; }
         public string SlotName { get; set; }
         public bool ShowUI { get; set; }
@@ -81,6 +82,8 @@ namespace EOAP.Plugin.AP
 
         public UIAction DrawConnectionMenu(Rect rect)
         {
+            string password = !string.IsNullOrEmpty(Password) ? "Yes" : "No";
+
             UIAction action = UIAction.None;
             GUILayout.BeginHorizontal();
             GUILayout.Label("Server: ", GUILayout.Width(50f));
@@ -89,7 +92,7 @@ namespace EOAP.Plugin.AP
             //Hostname = GUILayout.TextField(Hostname, GUILayout.Width(200f));
             GUILayout.Label("Slot:", GUILayout.Width(40f));
             GUILayout.Label(SlotName, GUI.skin.box, GUILayout.Width(150f));
-            GUILayout.Label("Password: No", GUILayout.Width(90f));
+            GUILayout.Label("Password: " + password, GUILayout.Width(90f));
             //SlotName =  GUILayout.TextField(SlotName, GUILayout.Width(120f));
 
             if (GUILayout.Button("Connect", GUILayout.Width(80f)))

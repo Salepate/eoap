@@ -45,7 +45,7 @@ namespace EOAP.Plugin.AP
         //
         public static RectTransform NotificationRoot;
         public static Text NotificationText;
-        
+        public static InputTextWindow InputTextWindow;
 
 
         public static Canvas TitleUI;
@@ -62,6 +62,7 @@ namespace EOAP.Plugin.AP
             GOResolver.ResetScene();
             TitleUI = GOResolver.Resolve<Canvas>("Canvas");
             Text textObj = GOResolver.Resolve<Text>("Canvas.TitleMenu.SelectList.SelectLoad.Base.Name");
+            InputTextWindow = GOResolver.Resolve<InputTextWindow>("TopUiInterface(Clone).Canvas.InputTextWindow");
             Font01 = textObj.font;
         }
 
@@ -71,7 +72,6 @@ namespace EOAP.Plugin.AP
             var img = GOResolver.Resolve<Image>("ScreenInterface(Clone).Canvas.ShakeGroup.PartyArea.col1.PartyMember.ShakePart.Base");
             NotificationSprite = img?.sprite;
             NotificationSpriteColor = img.color;
-            //InnUI = GOResolver.Resolve<Canvas>("Inn(Clone)");
         }
     }
 }
