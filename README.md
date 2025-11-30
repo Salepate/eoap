@@ -21,6 +21,11 @@ Require to downgrade EO: HD to the first version<br/>
 ## Other Features
 * Custom debug menu and native game debug menu access
 
+## Hierarchy
+
+* EOAP.Plugin - .NET Plugin for EO HD
+* Dumps - some logs that I generated to understand parts of the game
+
 ## Licensing
 
 There is no Licence at the the moment. <br/>
@@ -44,9 +49,6 @@ No one may reproduce, distribute or create derivative work
 * Connect before loading save (will be fixed)
 * No game inputs override found yet, so connection data is edited in json
 
-## Hierarchy
-
-* EOAP.Plugin - .NET Plugin for EO HD
 
 ## Credits
 

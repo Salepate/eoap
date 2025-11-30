@@ -1,0 +1,30 @@
+# Walking Forward/Backward
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromPlace
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckk
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+
+# Turning Left or Right
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckk
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType
+[Info   :EOHD-Archipelago] Master::EventCheck::EventCheckFromType

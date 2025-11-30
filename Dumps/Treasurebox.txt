@@ -1,0 +1,25 @@
+# Open Closed Box > No
+DungeonTreasureState::OnInitialize
+DungeonTreasureState::TreasureOpenCheckFunc (tbox: 2)
+DungeonTreasureState::InquireOpenFunc
+DungeonTreasureState::_InquireOpenFunc_b__36_0
+DungeonTreasureState::OnEnd
+
+# Open Closed Box > Yes
+DungeonTreasureState::OnInitialize
+DungeonTreasureState::TreasureOpenCheckFunc (tbox: 2)
+DungeonTreasureState::InquireOpenFunc
+DungeonTreasureState::_InquireOpenFunc_b__36_0
+DungeonTreasureState::IsItemFull
+DungeonTreasureState::PlayAnimFunc
+DungeonTreasureState::GetItemFunc
+# AP Hook > Send Location
+DungeonTreasureState::GetTextGetItem
+DungeonTreasureState::StateEndFunc
+DungeonTreasureState::OnEnd
+
+# Open Opened Box
+DungeonTreasureState::OnInitialize
+DungeonTreasureState::TreasureOpenCheckFunc (tbox: 2)
+DungeonTreasureState::StateEndFunc
+DungeonTreasureState::OnEnd
