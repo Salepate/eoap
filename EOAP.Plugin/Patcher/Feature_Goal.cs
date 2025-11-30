@@ -1,4 +1,5 @@
-﻿using EOAP.Plugin.Behaviours;
+﻿using EOAP.Plugin.AP;
+using EOAP.Plugin.Behaviours;
 using HarmonyLib;
 
 namespace EOAP.Plugin.Patcher
@@ -14,6 +15,11 @@ namespace EOAP.Plugin.Patcher
             {
                 APBehaviour.GetPersistent().AddSkipItems(BLMCHKGFPGD, EO1.MissionRewards, EO1.MissionEnRewards);
                 session.SendLocation(loc);
+            }
+
+            if (EOConfig.GoalTypeMission && EOConfig.GoalMission == BLMCHKGFPGD)
+            {
+                APBehaviour.GetSession().Session.SetGoalAchieved();
             }
         }
     }

@@ -9,6 +9,9 @@ namespace EOAP.Plugin.AP
         // DBG Configuration
         public static bool PrintActivatedFlags = false;
         // YAML Configuration
+        public static int GoalMission = 0; //
+        public static bool GoalTypeMission = true;
+
         public static int StartingEntal = 1000; // default values
         public static int PriceOverride = -1;
         public static int PriceScale = 100;
@@ -47,6 +50,8 @@ namespace EOAP.Plugin.AP
                 { "price_mode", (v) => UseOverride = (int) v == 1 },
                 { "price_percent_value", (v) => PriceScale = (int)v },
                 { "price_flat_value", (v) => PriceOverride = (int)v },
+                { "goal_mode", (v) => GoalTypeMission = v == 0 },
+                { "goal_mission", (v) => GoalMission = (int)v }
             };
         }
 
