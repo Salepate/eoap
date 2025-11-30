@@ -1,5 +1,12 @@
 # Etrian Odyssey: HD - Archipelago Client
 
+## Copyrights and Trademark
+**Etrian Odyssey HD** is a game that has been published on Steam in 2023 (and Switch) by **Sega** and developped by **Atlus**.<br/>
+The game and all its assets are the property of its rightful owner (Atlus).
+This work is an independent research modding project and is not official, endorsed, or for profit.
+All rights to the game content are reserved by its owners. 
+
+The repository does not contain any file that are parts of the original Game.
 ## Informations
 
 This is a work in progress.<br/>
