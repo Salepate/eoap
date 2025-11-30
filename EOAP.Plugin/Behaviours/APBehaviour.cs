@@ -197,6 +197,7 @@ namespace EOAP.Plugin.Behaviours
         {
             _debug.SwapToWindow(-1);
             UI.ShowUI = false;
+            InControl.InputManager.Enabled = true;
             _persistentFileName = EOPersistent.GetFilePath(_session.Session.RoomState.Seed, _session.Session.ConnectionInfo.Slot);
 
             //
