@@ -8,6 +8,15 @@ namespace EOAP.Plugin.AP
     [System.Serializable]
     public class EOPersistent
     {
+
+        public bool IsGoal;
+        public int LastIndex = -1;
+        public List<long> PendingItems = new List<long>();
+        public List<long> CompleteLocations = new List<long>();
+
+        public List<long> ItemsToSkip = new List<long>();
+        public List<int> EntalToSkip = new List<int>();
+
         public static string GetFilePath(string seed, int slot)
         {
             string fileName = $"{seed}_{slot}.json";
@@ -76,13 +85,5 @@ namespace EOAP.Plugin.AP
                 EntalToSkip.Add((int)entalValue);
             }
         }
-
-
-        public int LastIndex = -1;
-        public List<long> PendingItems = new List<long>();
-        public List<long> CompleteLocations = new List<long>();
-
-        public List<long> ItemsToSkip = new List<long>();
-        public List<int> EntalToSkip = new List<int>();
     }
 }

@@ -19,7 +19,7 @@ namespace EOAP.Plugin.Patcher
 
             if (EOConfig.GoalTypeMission && EOConfig.GoalMission == BLMCHKGFPGD)
             {
-                APBehaviour.GetSession().Session.SetGoalAchieved();
+                APBehaviour.GetSession().SendGoal();
             }
         }
     }

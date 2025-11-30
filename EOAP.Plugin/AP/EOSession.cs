@@ -18,11 +18,24 @@ namespace EOAP.Plugin.AP
 
         private List<long> _idsBuffer = new List<long>();
 
+        public void SendGoal()
+        {
+            if (!Connected)
+            {
+                GDebug.LogError("Cannot send Goal, not connected");
+                return;
+            }
+            Session.SetGoalAchieved();
+            Session.SetClientState(ArchipelagoClientState.ClientGoal);
+            APBehaviour.GetPersistent().IsGoal = true;
+            APBehaviour.SavePersistentData();
+
+        }
         public void SendLocation(params string[] locations)
         {
             if (!Connected)
             {
-                GDebug.Log("Cannot send locations AP, not connected");
+                GDebug.LogError("Cannot send locations AP, not connected");
                 return;
             }
             _idsBuffer.Clear();

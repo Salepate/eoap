@@ -87,7 +87,7 @@ namespace EOAP.Plugin.AP
 
         private static void SendVictory(long obj)
         {
-            APBehaviour.GetSession().Session.SetGoalAchieved();
+            APBehaviour.GetSession().SendGoal();
         }
 
         private static void EntalReward(long value)

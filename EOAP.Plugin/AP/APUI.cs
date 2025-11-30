@@ -1,5 +1,10 @@
-﻿using EOAP.Plugin.Behaviours;
+﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.Packets;
+using EOAP.Plugin.Behaviours;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace EOAP.Plugin.AP
@@ -46,14 +51,38 @@ namespace EOAP.Plugin.AP
 
         public UIAction DrawSessionMenu(Rect rect)
         {
-            GUILayout.Label("Connected");
+            EOSession eoSession = APBehaviour.GetSession();
+            EOPersistent persistent = APBehaviour.GetPersistent();
+
+            ArchipelagoSession apSession = eoSession.Session;
+            GUILayout.BeginHorizontal();
+            GUI.skin.label.fontStyle = FontStyle.Bold;
+            GUILayout.Label("Connected", GUILayout.Width(80f));
+            GUI.skin.label.fontStyle = FontStyle.Normal;
+
+            IRoomStateHelper room = apSession.RoomState;
+            bool guiState = GUI.enabled;
+            bool canRelease = room.ReleasePermissions == Permissions.Enabled || (room.ReleasePermissions == Permissions.Goal && persistent.IsGoal);
+            bool canCollect = room.CollectPermissions == Permissions.Enabled || (room.CollectPermissions == Permissions.Goal && persistent.IsGoal);
+            GUI.enabled = guiState && canRelease;
+            if (GUILayout.Button("Release", GUILayout.Width(100f)))
+            {
+                apSession.Locations.CompleteLocationChecks(apSession.Locations.AllMissingLocations.ToArray());
+            }
+            GUI.enabled = guiState && canCollect;
+            if (GUILayout.Button("Collect", GUILayout.Width(100f)))
+            {
+                apSession.Say("!collect");
+            }
+
+            GUILayout.EndHorizontal();
             return UIAction.None;
         }
 
         public UIAction DrawConnectionMenu(Rect rect)
         {
             UIAction action = UIAction.None;
-            GUILayout.BeginHorizontal(GUI.skin.box);
+            GUILayout.BeginHorizontal();
             GUILayout.Label("Server: ", GUILayout.Width(50f));
             GUILayout.Label(Hostname, GUI.skin.box, GUILayout.Width(150f));
             // Crash (Stripped calls)
