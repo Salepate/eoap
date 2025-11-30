@@ -100,9 +100,9 @@ namespace EOAP.Plugin.AP
         public void DrawUI(Rect pos)
         {
             int nextWindow = -1;
-            StrippedUI.BeginArea(pos, GUI.skin.box);
             if (APBehaviour.UI.ShowDebug)
             {
+                StrippedUI.BeginArea(pos, GUI.skin.box);
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Game Debug"))
                 {
@@ -119,8 +119,9 @@ namespace EOAP.Plugin.AP
                     }
                 }
                 GUILayout.EndHorizontal();
+                StrippedUI.EndArea();
             }
-            StrippedUI.EndArea();
+
             if (nextWindow != -1)
                 SwapToWindow(nextWindow);
         }

@@ -12,6 +12,7 @@ namespace EOAP.Plugin.AP
         public string Hostname;
         public string Slotname;
         public string Password;
+        public bool DebugUtils;
 
         public static bool FileExists { get; internal set; }
 
@@ -53,7 +54,8 @@ namespace EOAP.Plugin.AP
             {
                 Hostname = "localhost",
                 Slotname = "Player1",
-                Password = ""
+                Password = "",
+                DebugUtils = false
             };
         }
 

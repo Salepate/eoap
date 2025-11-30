@@ -28,6 +28,8 @@ namespace EOAP.Plugin.AP
 
         public string HostnameNoPort { get; private set; }
         public int HostPort { get; private set; }
+        public bool ShowDebug { get; internal set; }
+
         public enum UIAction
         {
             None,

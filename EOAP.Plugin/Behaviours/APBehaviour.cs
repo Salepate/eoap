@@ -67,6 +67,7 @@ namespace EOAP.Plugin.Behaviours
             EOItems.LoadDatabase();
             // UI Views
             _UI = new APUI();
+            _UI.ShowDebug = connectionFile.DebugUtils;
             _UI.Hostname = connectionFile.Hostname;
             _UI.SlotName = connectionFile.Slotname;
             _UI.Password = connectionFile.Password;
@@ -131,11 +132,13 @@ namespace EOAP.Plugin.Behaviours
             toggleRect.height = WindowHeight;
             archipelagoPanel.xMin = toggleRect.xMax;
 
-
-            if (GUI.Button(toggleRect, _UI.ShowUI ? "-" : "+"))
+            if (_UI.ShowDebug)
             {
-                _UI.ShowUI =  !_UI.ShowUI;
-                InControl.InputManager.Enabled = !_UI.ShowUI;
+                if (GUI.Button(toggleRect, _UI.ShowUI ? "-" : "+"))
+                {
+                    _UI.ShowUI =  !_UI.ShowUI;
+                    InControl.InputManager.Enabled = !_UI.ShowUI;
+                }
             }
 
             if (_UI.ShowUI && !InControl.InputManager.Enabled)
