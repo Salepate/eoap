@@ -74,6 +74,7 @@ namespace EOAP.Plugin.Behaviours
             _patchers = new List<Harmony>();
             Harmony patcher = new Harmony("eaop.patch");
             patcher.PatchAll();
+            Feature_ItemSync.Patch(patcher);
             _patchers.Add(patcher);
             // DBG
             _debug = new APDebug();
