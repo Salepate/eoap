@@ -21,8 +21,10 @@ namespace EOAP.Plugin.Patcher
         {
             if (LHIBOLMPPOI)
             {
+
                 if (EOItems.FlagLocations.TryGetValue(IINBFPLGLMN, out string locStr))
                 {
+                    APBehaviour.GetPersistent().AddSkipItems(IINBFPLGLMN, EO1.EventRewards);
                     APBehaviour.GetSession().SendLocation(locStr);
                 }
                 APDebug.PrintActivateFlag(IINBFPLGLMN);

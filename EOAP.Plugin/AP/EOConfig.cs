@@ -4,6 +4,8 @@ namespace EOAP.Plugin.AP
 {
     public static class EOConfig
     {
+        // Fixed Configuration?
+        public const int InventoryLimit = 60;
         // DBG Configuration
         public static bool PrintActivatedFlags = false;
         // YAML Configuration

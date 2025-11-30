@@ -21,15 +21,30 @@ namespace EOAP.Plugin.AP
         }
 
 
-        public void ProcessPendingItems()
+        public void InjectItems()
         {
-            if (PendingItems.Count > 0)
-                GDebug.Log($"Adding {PendingItems.Count} items from AP");
-            for(int i = 0; i < PendingItems.Count; ++i)
+            int addedItems = 0;
+
+            for (int i = ItemsToSkip.Count - 1; i >= 0; --i)
             {
-                AddGameItem(PendingItems[i]);
+                if (GoldItem.GetPartyCarrySameItem((ItemNoEnum.ITEM_NO)ItemsToSkip[i]) > 0)
+                {
+                    GoldItem.DeletePartyItem((ItemNoEnum.ITEM_NO)ItemsToSkip[i]);
+                    ItemsToSkip.RemoveAt(i);
+                }
             }
-            PendingItems.Clear();
+
+            while(PendingItems.Count > 0 && GoldItem.GetPartyCarryItemAllNum() < EOConfig.InventoryLimit)
+            {
+                AddGameItem(PendingItems[0]);
+                PendingItems.RemoveAt(0);
+                ++addedItems;
+            }
+
+            if (addedItems > 0)
+            {
+                GDebug.Log($"Synced {addedItems} new items");
+            }
         }
 
         public void AddGameItem(long itemIndex)
@@ -49,9 +64,25 @@ namespace EOAP.Plugin.AP
             }
         }
 
+        public void AddSkipItems(int index, Dictionary<int, List<long>> itemDic = null, Dictionary<int, long> enDic = null)
+        {
+            if (itemDic != null && itemDic.TryGetValue(index, out List<long> itemRewards))
+            {
+                ItemsToSkip.AddRange(itemRewards);
+            }
+
+            if (enDic != null && enDic.TryGetValue(index, out long entalValue))
+            {
+                EntalToSkip.Add((int)entalValue);
+            }
+        }
+
 
         public int LastIndex = -1;
         public List<long> PendingItems = new List<long>();
         public List<long> CompleteLocations = new List<long>();
+
+        public List<long> ItemsToSkip = new List<long>();
+        public List<int> EntalToSkip = new List<int>();
     }
 }

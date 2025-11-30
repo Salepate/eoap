@@ -1,4 +1,6 @@
-﻿using EOAP.Plugin.DB;
+﻿using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.DB;
+using System;
 using System.Collections.Generic;
 
 namespace EOAP.Plugin.AP
@@ -15,6 +17,7 @@ namespace EOAP.Plugin.AP
 
         public static Dictionary<long, System.Action<long>> CustomItems = new Dictionary<long, System.Action<long>>()
         {
+            { 1000002, SendVictory },
             { 1000003, EntalReward }, // 500en
             { 1000004, EntalReward }, // 200en
             { 1000005, EntalReward }, // 100en
@@ -22,10 +25,10 @@ namespace EOAP.Plugin.AP
             { 1000009, EntalReward }, // 1en
             // Unhandled yet
             //FIRST_STRATUM_CLEARED: 1000001,
-            //VICTORY: 1000002,
             //NIGHT_10TP: 1000006, (note: disregard time)
             //FIRST_CHAR_10HP: 1000007,
         };
+
 
 
         public static void LoadDatabase()
@@ -80,6 +83,11 @@ namespace EOAP.Plugin.AP
                 GDebug.Log($"Registered {FlagLocations.Count} flags");
 
             }
+        }
+
+        private static void SendVictory(long obj)
+        {
+            APBehaviour.GetSession().Session.SetGoalAchieved();
         }
 
         private static void EntalReward(long value)
