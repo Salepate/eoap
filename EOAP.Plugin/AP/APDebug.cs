@@ -166,6 +166,7 @@ namespace EOAP.Plugin.AP
             GUI.skin.label.fontStyle = FontStyle.Bold;
             GUILayout.Label("Flags");
             GUI.skin.label.fontStyle = FontStyle.Normal;
+            GUILayout.Label($"Last Checked TreasureBox: {_lastTreasureBox}");
             GUILayout.Label($"Last Activated Flag: {_lastActivatedFlag}");
             if (GUILayout.Button("Reset All Known Flags"))
             {
@@ -177,6 +178,11 @@ namespace EOAP.Plugin.AP
             if (GUILayout.Button($"Show Flags in Console: [{EOConfig.PrintActivatedFlags}]"))
             {
                 EOConfig.PrintActivatedFlags = !EOConfig.PrintActivatedFlags;
+            }
+
+            if (GUILayout.Button($"Show TBox ID in Console: [{EOConfig.PrintTreasureBoxId}]"))
+            {
+                EOConfig.PrintTreasureBoxId = !EOConfig.PrintTreasureBoxId;
             }
             GUILayout.EndVertical();
 
@@ -197,6 +203,13 @@ namespace EOAP.Plugin.AP
             _lastActivatedFlag = flagID;
             if (EOConfig.PrintActivatedFlags)
                 GDebug.Log($"Activated Flag {flagID}");
+        }
+
+        public static void PrintTreasureBox(int tboxID)
+        {
+            _lastTreasureBox = tboxID;
+            if (EOConfig.PrintActivatedFlags)
+                GDebug.Log($"Last Treasure Box {_lastTreasureBox}");
         }
 
         //=============================================================
@@ -260,6 +273,8 @@ namespace EOAP.Plugin.AP
         private GameObject[] _rootObjects;
         private string[] _inspectBasicComponents = System.Array.Empty<string>();
         private List<string> _additionalData = new List<string>();
+        private static int _lastTreasureBox;
+
         private void SetList(GameObject[] list)
         {
             _rootObjects = list;

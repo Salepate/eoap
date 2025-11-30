@@ -32,6 +32,17 @@ namespace EOAP.Plugin.Patcher
         }
     }
 
+    [HarmonyPatch(typeof(DungeonTreasureState), nameof(DungeonTreasureState.TreasureOpenCheckFunc))]
+    public class AutoPatch_DungeonTreasureState_TreasureOpenCheckFunc
+    {
+        public static void Prefix(DungeonTreasureState __instance)
+        {
+            DungeonData.TBData treasureBox = __instance.KOHPIHBMMIC;
+            APDebug.PrintTreasureBox((int) treasureBox.TbId);
+        }
+    }
+
+
     [HarmonyPatch(typeof(GoldItem), nameof(GoldItem.AddPartyItem))]
     public class GoldItem_AddPartyItem
     {
