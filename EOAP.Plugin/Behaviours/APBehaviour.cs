@@ -97,13 +97,16 @@ namespace EOAP.Plugin.Behaviours
                 _UI.Hostname = connectionFile.Hostname;
                 _UI.SlotName = connectionFile.Slotname;
                 _UI.Password = connectionFile.Password;
-                if (_UI.ShowUI)
-                    InControl.InputManager.Enabled = false;
             }
+            if (_UI != null && _UI.ShowUI)
+                    InControl.InputManager.Enabled = false;
         }
 
         private void Update()
         {
+            if (_UI != null && _UI.ShowUI && InControl.InputManager.Enabled)
+                InControl.InputManager.Enabled = false;
+
             float dt = Time.deltaTime;
             _UI.Update(dt);
         }
