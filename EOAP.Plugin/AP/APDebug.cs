@@ -76,6 +76,8 @@ namespace EOAP.Plugin.AP
             if (ignoreWait)
             {
                 _window = -1;
+                APBehaviour.UI.ShowUI = false;
+                InControl.InputManager.Enabled = true;
             }
         }
 
@@ -97,29 +99,30 @@ namespace EOAP.Plugin.AP
 
         public void DrawUI(Rect pos)
         {
-            StrippedUI.BeginArea(pos, GUI.skin.box);
-            GUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Game Debug"))
-            {
-                APBehaviour.UI.ShowUI = false;
-                InControl.InputManager.Enabled = true;
-                DebugManager.JAOFCFFEELF.Open();
-            }
-
             int nextWindow = -1;
-            for(int i = 0; i < _windowNames.Length; ++i)
+            StrippedUI.BeginArea(pos, GUI.skin.box);
+            if (APBehaviour.UI.ShowDebug)
             {
-                if (GUILayout.Button(_windowNames[i]))
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("Game Debug"))
                 {
-                    nextWindow = i;
+                    APBehaviour.UI.ShowUI = false;
+                    InControl.InputManager.Enabled = true;
+                    DebugManager.JAOFCFFEELF.Open();
                 }
+                
+                for(int i = 0; i < _windowNames.Length; ++i)
+                {
+                    if (GUILayout.Button(_windowNames[i]))
+                    {
+                        nextWindow = i;
+                    }
+                }
+                GUILayout.EndHorizontal();
             }
-            GUILayout.EndHorizontal();
             StrippedUI.EndArea();
             if (nextWindow != -1)
                 SwapToWindow(nextWindow);
-                
         }
 
         public void SwapToWindow(int newWindow)
