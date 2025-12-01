@@ -9,7 +9,7 @@ namespace EOAP.Plugin.Patcher
     {
         public static void Prefix()
         {
-            APCanvasRipper.SetupTitleReferences();
+            Shinigami.SetupTitleReferences();
         }
     }
 }

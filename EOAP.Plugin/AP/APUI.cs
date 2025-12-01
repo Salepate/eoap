@@ -1,35 +1,46 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
-using Archipelago.MultiClient.Net.Packets;
+using Dirt.Hackit;
 using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.Dirt;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+
 namespace EOAP.Plugin.AP
 {
-
+    using APState = APBehaviour.APState;
     // IMGUI UI
     public class APUI
     {
+        public const float WindowHeight = 28f;
+        public const float DebugHeight = 28f;
         // Notifications Data
-        private float _time;
         private float _delay;
         private List<NotificationBehaviour> ActiveNotifications;
         private Queue<Notification> PendingNotifications;
         private Queue<NotificationBehaviour> _notificationPool;
+        private CheckTextBehaviour _checksInfo;
         private bool[] _notificationSlots;
+        private System.Action<Rect>[] _UIActions;
+
         public const int ConcurrentNotifications = 10;
         public string Password { get; set; }
         public string Hostname { get; set; }
         public string SlotName { get; set; }
         public bool ShowUI { get; set; }
-
-        public string HostnameNoPort { get; private set; }
-        public int HostPort { get; private set; }
         public bool ShowDebug { get; internal set; }
+        public bool ConnectionError { get; internal set; }
+        public string ErrorMessage { get; internal set; }
 
+        private int _subMenuIndex;
+        private List<Action<Rect, APUI>> _subMenus { get; set; }
+        private List<string> _subMenuLabels;
+        private bool _styleReady;
+        private int _homeScreen;
         public enum UIAction
         {
             None,
@@ -39,20 +50,128 @@ namespace EOAP.Plugin.AP
         public APUI()
         {
             ActiveNotifications = new List<NotificationBehaviour>();
-            _notificationPool = new Queue<NotificationBehaviour>();
             PendingNotifications = new Queue<Notification>();
-            _time = 0f;
             ShowUI = true;
+            _UIActions = new System.Action<Rect>[2];
+            _UIActions[0] = DrawConnectionMenu; // Offline
+            _UIActions[1] = DrawSessionMenu; // Connected
+
+            _notificationPool = new Queue<NotificationBehaviour>();
+            _subMenuLabels = new List<string>();
+            _subMenus = new List<Action<Rect, APUI>>();
+            _styleReady = false;
+            _homeScreen = AddMenu(APHomeScreen.DrawHomescreen);
+            DisplayMenu(_homeScreen);
+        }
+
+        public int AddMenu(System.Action<Rect, APUI> menu, string menuName = "")
+        {
+            _subMenuLabels.Add(menuName);
+            _subMenus.Add(menu);
+            return _subMenus.Count - 1;
+        }
+
+        public void DisplayMenu(int newWindow)
+        {
+            if (_subMenuIndex != newWindow && newWindow != -1)
+            {
+                _subMenuIndex = newWindow;
+            }
+            else
+            {
+                _subMenuIndex = newWindow;
+                SetUIVisibility(false);
+            }
+        }
+
+        public void PushNotification(string text, float duration = 1f)
+        {
+            Notification notification = new Notification()
+            {
+                Text = text,
+                Timestamp = duration
+            };
+
+            PendingNotifications.Enqueue(notification);
+        }
+
+        public void RefreshChecks()
+        {
+            if (_checksInfo != null)
+                _checksInfo.FetchChecksData();
         }
 
         public void Update(float deltaTime)
         {
-            _time += deltaTime;
             ProcessNotifications(deltaTime);
         }
 
+        public void DrawGUI(APState state)
+        {
+            if (!_styleReady)
+            {
+                StyleUI.Setup(ShowDebug);
+                _styleReady = true;
+            }
 
-        public UIAction DrawSessionMenu(Rect rect)
+            float height = WindowHeight;
+            if (ShowDebug)
+                height += DebugHeight;
+
+            Rect containerPanel = new Rect(10f, 10f, Screen.width - 20f, height);
+            Rect archipelagoPanel = containerPanel;
+            archipelagoPanel.height = WindowHeight;
+            archipelagoPanel.width = 360f;
+
+            Rect tabsPanel = containerPanel;
+            tabsPanel.y = archipelagoPanel.yMax;
+            tabsPanel.height = DebugHeight;
+
+            Rect uiWindow = containerPanel;
+            uiWindow.y = containerPanel.yMax + 10f;
+            uiWindow.yMax = Screen.height - 10f;
+
+            Rect toggleRect = containerPanel;
+            toggleRect.width = WindowHeight;
+            toggleRect.height = WindowHeight;
+            archipelagoPanel.xMin = toggleRect.xMax;
+
+            if (_subMenuIndex != _homeScreen)
+            {
+                if (GUI.Button(toggleRect, ShowUI ? "-" : "+"))
+                {
+                    SetUIVisibility(!ShowUI);
+                }
+            }
+
+
+            if (ShowUI && !InControl.InputManager.Enabled)
+            {
+                InControl.InputManager.Enabled = false;
+            }
+
+            if (state != APState.Connected || ShowUI)
+            {
+                int stateIndex = (int)state;
+                StrippedUI.BeginArea(archipelagoPanel, GUI.skin.box);
+                _UIActions[stateIndex](archipelagoPanel);
+                StrippedUI.EndArea();
+            }
+
+            if (ShowUI)
+            {
+                DrawMenuTabs(tabsPanel);
+                DrawWindow(uiWindow);
+            }
+        }
+
+        public void SetUIVisibility(bool visibility)
+        {
+            ShowUI = visibility;
+            InControl.InputManager.Enabled = !ShowUI;
+        }
+
+        public void DrawSessionMenu(Rect rect)
         {
             EOSession eoSession = APBehaviour.GetSession();
             EOPersistent persistent = APBehaviour.GetPersistent();
@@ -77,65 +196,59 @@ namespace EOAP.Plugin.AP
             {
                 apSession.Say("!collect");
             }
-
             GUILayout.EndHorizontal();
-            return UIAction.None;
+            GUI.enabled = guiState;
         }
 
-        public UIAction DrawConnectionMenu(Rect rect)
+        public void DrawConnectionMenu(Rect rect)
         {
-            string password = !string.IsNullOrEmpty(Password) ? "Yes" : "No";
+        }
 
-            UIAction action = UIAction.None;
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Server: ", GUILayout.Width(50f));
-            GUILayout.Label(Hostname, GUI.skin.box, GUILayout.Width(150f));
-            // Crash (Stripped calls)
-            //Hostname = GUILayout.TextField(Hostname, GUILayout.Width(200f));
-            GUILayout.Label("Slot:", GUILayout.Width(40f));
-            GUILayout.Label(SlotName, GUI.skin.box, GUILayout.Width(150f));
-            GUILayout.Label("Password: " + password, GUILayout.Width(90f));
-            //SlotName =  GUILayout.TextField(SlotName, GUILayout.Width(120f));
-
-            if (GUILayout.Button("Connect", GUILayout.Width(80f)))
+        private void DrawMenuTabs(Rect pos)
+        {
+            int nextWindow = -1;
+            if (APBehaviour.UI.ShowDebug)
             {
-                if (Hostname.Contains(":"))
+                StrippedUI.BeginArea(pos, GUI.skin.box);
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("Game Debug"))
                 {
-                    string[] splitted = Hostname.Split(':');
-                    HostnameNoPort = splitted[0];
-                    if (int.TryParse(splitted[1], out int port))
+                    APBehaviour.UI.ShowUI = false;
+                    InControl.InputManager.Enabled = true;
+                    DebugManager.JAOFCFFEELF.Open();
+                }
+
+                for (int i = 0; i < _subMenuLabels.Count; ++i)
+                {
+                    if (string.IsNullOrEmpty(_subMenuLabels[i]))
+                        continue;
+
+                    if (GUILayout.Button(_subMenuLabels[i]))
                     {
-                        HostPort = port;
-                        action = UIAction.Connect;
+                        nextWindow = i;
                     }
                 }
+
+                GUILayout.EndHorizontal();
+                StrippedUI.EndArea();
             }
 
-            if (GUILayout.Button("Edit Auth", GUILayout.Width(80f)))
+            if (nextWindow != -1)
             {
-                System.Diagnostics.Process.Start("notepad.exe", APConnection.GetFilePath());
+                DisplayMenu(nextWindow);
+            }
+        }
+
+        private void DrawWindow(Rect pos)
+        {
+            if (_subMenuIndex < 0 || _subMenuIndex >= _subMenus.Count)
+            {
+                return;
             }
 
-            GUILayout.EndHorizontal();
-            return action;
-        }
-
-
-        public struct Notification
-        {
-            public string Text;
-            public float Timestamp;
-        }
-
-        public void PushNotification(string text, float duration = 1f)
-        {
-            Notification notification = new Notification()
-            {
-                Text = text,
-                Timestamp = duration
-            };
-
-            PendingNotifications.Enqueue(notification);
+            StrippedUI.BeginArea(pos, GUI.skin.box);
+            _subMenus[_subMenuIndex](pos, this);
+            StrippedUI.EndArea();
         }
 
         private void ProcessNotifications(float deltaTime)
@@ -167,7 +280,7 @@ namespace EOAP.Plugin.AP
             {
                 if (playSound)
                 {
-                    EO1.PlaySFX(APCanvasRipper.SFX.GamePurchase);
+                    EO1.PlaySFX(Shinigami.SFX.GamePurchase);
                     playSound = false;
                 }
                 int slot = -1;
@@ -200,6 +313,26 @@ namespace EOAP.Plugin.AP
                 _notificationPool.Enqueue(NotificationBehaviour.Create());
             }
             _notificationSlots = new bool[ConcurrentNotifications];
+        }
+
+        internal void CreateCheckText()
+        {
+            if (_checksInfo == null)
+            {
+                _checksInfo = CheckTextBehaviour.Create();
+            }
+        }
+
+        internal void ResetStyle()
+        {
+            _styleReady = false;
+        }
+
+        // structs
+        public struct Notification
+        {
+            public string Text;
+            public float Timestamp;
         }
     }
 }

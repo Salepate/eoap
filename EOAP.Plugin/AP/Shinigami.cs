@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace EOAP.Plugin.AP
 {
-    public static class APCanvasRipper
+    public static class Shinigami
     {
         // 
         // Sounds
@@ -51,6 +51,8 @@ namespace EOAP.Plugin.AP
         public static Canvas TitleUI;
         public static Canvas GameHUD;
         public static Canvas InnUI;
+        public static RectTransform GatherHUD;
+        public static RectTransform PauseUI;
 
         public static Font Font01;
 
@@ -64,6 +66,13 @@ namespace EOAP.Plugin.AP
             Text textObj = GOResolver.Resolve<Text>("Canvas.TitleMenu.SelectList.SelectLoad.Base.Name");
             InputTextWindow = GOResolver.Resolve<InputTextWindow>("TopUiInterface(Clone).Canvas.InputTextWindow");
             Font01 = textObj.font;
+        }
+
+        public static void SetupPauseMenuReferences()
+        {
+            GOResolver.ResetScene();
+            PauseUI = GOResolver.Resolve<RectTransform>("Camp(Clone).CampMenu.RootMenu");
+            GatherHUD = GOResolver.Resolve<RectTransform>("Camp(Clone).CampMenu.RootMenu.GatheringCount");
         }
 
         internal static void SetupTownReferences()

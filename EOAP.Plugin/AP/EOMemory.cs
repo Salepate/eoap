@@ -8,6 +8,8 @@ namespace EOAP.Plugin.AP
         public static bool[] ShopLocations = System.Array.Empty<bool>();
         public static string[] ShopHint = System.Array.Empty<string>();
 
+        public static bool AllowLazyLoad { get; internal set; }
+
         public static void PrepareMemory()
         {
             ShopLocations = EnumUtility.CreateArray<bool, ItemNoEnum.ITEM_NO>();

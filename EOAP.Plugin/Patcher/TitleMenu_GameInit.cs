@@ -24,6 +24,7 @@ namespace EOAP.Plugin.Patcher
             }
             else
             {
+                EOMemory.AllowLazyLoad = true;
                 GDebug.Log("Not connected to AP, cannot restore items");
             }
         }

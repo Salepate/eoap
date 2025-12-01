@@ -78,9 +78,9 @@ namespace EOAP.Plugin.Behaviours
             GameObject notificationObj = new GameObject("NotificationRoot", Il2CppType.Of<RectTransform>());
             var rectTr = notificationObj.GetComponent<RectTransform>();
             var img = notificationObj.AddComponent<Image>();
-            rectTr.SetParent(APCanvasRipper.GameHUD.transform);
-            img.sprite = APCanvasRipper.NotificationSprite;
-            img.color = APCanvasRipper.NotificationSpriteColor;
+            rectTr.SetParent(Shinigami.GameHUD.transform);
+            img.sprite = Shinigami.NotificationSprite;
+            img.color = Shinigami.NotificationSpriteColor;
             img.SetNativeSize();
             img.type = Image.Type.Sliced;
             rectTr.sizeDelta = new Vector2(600f, 60f);
@@ -92,7 +92,7 @@ namespace EOAP.Plugin.Behaviours
             textRectr.localPosition = Vector3.zero;
             var text = imgText.AddComponent<Text>();
             text.text = string.Empty;
-            text.font = APCanvasRipper.Font01;
+            text.font = Shinigami.Font01;
             text.alignment = TextAnchor.MiddleCenter;
             text.fontSize = 24;
             text.horizontalOverflow = HorizontalWrapMode.Overflow;

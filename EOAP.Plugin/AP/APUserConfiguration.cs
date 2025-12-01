@@ -1,11 +1,10 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.IO;
 
 namespace EOAP.Plugin.AP
 {
     [System.Serializable]
-    public class APConnection
+    public class APUserConfiguration
     {
         public static string GetFilePath() => "ap_connection.json";
 
@@ -13,6 +12,7 @@ namespace EOAP.Plugin.AP
         public string Slotname;
         public string Password;
         public bool DebugUtils;
+        public bool FastQuit;
 
         public static bool FileExists { get; internal set; }
 
@@ -34,14 +34,14 @@ namespace EOAP.Plugin.AP
             }
         }
 
-        public static APConnection LoadConnectionFile()
+        public static APUserConfiguration LoadConnectionFile()
         {
             if (File.Exists(GetFilePath()))
             {
                 try
                 {
                     string content = File.ReadAllText(GetFilePath());
-                    return JsonConvert.DeserializeObject<APConnection>(content);
+                    return JsonConvert.DeserializeObject<APUserConfiguration>(content);
 
                 } catch(System.Exception e)
                 {
@@ -50,7 +50,7 @@ namespace EOAP.Plugin.AP
                 }
             }
 
-            return new APConnection()
+            return new APUserConfiguration()
             {
                 Hostname = "localhost",
                 Slotname = "Player1",
@@ -63,7 +63,7 @@ namespace EOAP.Plugin.AP
         {
             if (!File.Exists(GetFilePath()))
             {
-                APConnection file = LoadConnectionFile();
+                APUserConfiguration file = LoadConnectionFile();
                 file.SaveConnectionFile();
             }
         }

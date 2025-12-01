@@ -1,45 +1,12 @@
-﻿using Il2CppInterop.Common;
-using Il2CppInterop.Runtime;
-using Il2CppInterop.Runtime.Injection;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Dirt.Hackit
 {
     internal class StrippedUI
     {
-        public static void BeginArea(Rect screenRect)
-        {
-            BeginArea(screenRect, GUIContent.none, GUIStyle.none);
-        }
-
-        public static void BeginArea(Rect screenRect, string text)
-        {
-            BeginArea(screenRect, GUIContent.Temp(text), GUIStyle.none);
-        }
-
-        public static void BeginArea(Rect screenRect, Texture image)
-        {
-            BeginArea(screenRect, GUIContent.Temp(image), GUIStyle.none);
-        }
-
-        public static void BeginArea(Rect screenRect, GUIContent content)
-        {
-            BeginArea(screenRect, content, GUIStyle.none);
-        }
-
         public static void BeginArea(Rect screenRect, GUIStyle style)
         {
             BeginArea(screenRect, GUIContent.none, style);
-        }
-
-        public static void BeginArea(Rect screenRect, string text, GUIStyle style)
-        {
-            BeginArea(screenRect, GUIContent.Temp(text), style);
-        }
-
-        public static void BeginArea(Rect screenRect, Texture image, GUIStyle style)
-        {
-            BeginArea(screenRect, GUIContent.Temp(image), style);
         }
 
         public static void BeginArea(Rect screenRect, GUIContent content, GUIStyle style)

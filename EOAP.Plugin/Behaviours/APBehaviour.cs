@@ -1,6 +1,5 @@
-﻿using Archipelago.MultiClient.Net;
-using Dirt.Hackit;
-using EOAP.Plugin.AP;
+﻿using EOAP.Plugin.AP;
+using EOAP.Plugin.Dirt;
 using EOAP.Plugin.Patcher;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -12,29 +11,21 @@ namespace EOAP.Plugin.Behaviours
 {
     public class APBehaviour : MonoBehaviour
     {
-        public const float WindowHeight = 28f;
-        public const float DebugHeight = 28f;
         public enum APState
         {
             Offline,
             Connected
         }
-
+        private static APBehaviour s_Instance;
 
         // internal state
         private EOSession _session;
         private EOPersistent _persistent;
-        private bool _showDebug;
         private APUI _UI;
-        private System.Func<Rect, APUI.UIAction>[] _UIActions;
-        private Dictionary<APUI.UIAction, System.Action> _actionMap;
+        private Dictionary<APUI.UIAction, Action> _actionMap;
         private APState _state;
-
-
-        private static APBehaviour s_Instance;
         private APDebug _debug;
         private string _persistentFileName;
-
         private List<Harmony> _patchers;
 
         // API
@@ -44,23 +35,21 @@ namespace EOAP.Plugin.Behaviours
 
         public static void PushNotification(string notification, float duration = 2f) => s_Instance._UI.PushNotification(notification, duration);
 
-        public APBehaviour(IntPtr ptr) : base(ptr)
-        {
 
-        }
+        public APBehaviour(IntPtr ptr) : base(ptr) {}
 
         private void Start()
         {
-            if (!APConnection.FileExists)
+
+            if (!APUserConfiguration.FileExists)
             {
-                APConnection.CreateDefaultSaveFile();
+                APUserConfiguration.CreateDefaultSaveFile();
             }
 
-            APConnection connectionFile = APConnection.LoadConnectionFile();
+            APUserConfiguration connectionFile = APUserConfiguration.LoadConnectionFile();
             _persistent = new EOPersistent();
             s_Instance = this;
             // State
-            _showDebug = true;
             _state = APState.Offline;
             _session = new EOSession();
             // DB 
@@ -71,9 +60,6 @@ namespace EOAP.Plugin.Behaviours
             _UI.Hostname = connectionFile.Hostname;
             _UI.SlotName = connectionFile.Slotname;
             _UI.Password = connectionFile.Password;
-            _UIActions = new System.Func<Rect, APUI.UIAction>[2];
-            _UIActions[0] = _UI.DrawConnectionMenu; // Offline
-            _UIActions[1] = _UI.DrawSessionMenu; // Connected
             // UI Actions
             _actionMap = new Dictionary<APUI.UIAction, Action>();
             _actionMap.Add(APUI.UIAction.Connect, StartSession);
@@ -84,19 +70,27 @@ namespace EOAP.Plugin.Behaviours
             Feature_ItemSync.Patch(patcher);
             _patchers.Add(patcher);
             // DBG
-            _debug = new APDebug();
+            _debug = new APDebug(_UI);
+            UI.SetUIVisibility(true);
 
-            InControl.InputManager.Enabled = false;
+            //
+            if (connectionFile.FastQuit)
+            {
+                Application.quitting = null;
+                Application.wantsToQuit = null;
+            }
         }
 
         private void OnApplicationFocus(bool focus)
         {
             if (focus && (_session == null || !_session.Connected) && _UI != null)
             {
-                APConnection connectionFile = APConnection.LoadConnectionFile();
+                APUserConfiguration connectionFile = APUserConfiguration.LoadConnectionFile();
                 _UI.Hostname = connectionFile.Hostname;
                 _UI.SlotName = connectionFile.Slotname;
                 _UI.Password = connectionFile.Password;
+                _UI.ShowDebug = connectionFile.DebugUtils;
+                _UI.ResetStyle();
             }
             if (_UI != null && _UI.ShowUI)
                     InControl.InputManager.Enabled = false;
@@ -113,63 +107,17 @@ namespace EOAP.Plugin.Behaviours
 
         private void OnGUI()
         {
-            float height = WindowHeight;
-            if (_showDebug)
-                height += DebugHeight;
+            _UI.DrawGUI(_state);
+        }
 
-            APUI.UIAction action = APUI.UIAction.None;
-
-            Rect containerPanel = new Rect(10f, 10f, Screen.width - 20f, height);
-            Rect archipelagoPanel = containerPanel;
-            archipelagoPanel.height = WindowHeight;
-
-            Rect debugPanel = containerPanel;
-            debugPanel.y = archipelagoPanel.yMax;
-            debugPanel.height = DebugHeight;
-
-            Rect windowScreen = containerPanel;
-            windowScreen.y = containerPanel.yMax + 10f;
-            windowScreen.yMax = Screen.height - 10f;
-
-            Rect toggleRect = containerPanel;
-            toggleRect.width = WindowHeight;
-            toggleRect.height = WindowHeight;
-            archipelagoPanel.xMin = toggleRect.xMax;
-
-            if (_UI.ShowDebug)
-            {
-                if (GUI.Button(toggleRect, _UI.ShowUI ? "-" : "+"))
-                {
-                    _UI.ShowUI =  !_UI.ShowUI;
-                    InControl.InputManager.Enabled = !_UI.ShowUI;
-                }
-            }
-
-            if (_UI.ShowUI && !InControl.InputManager.Enabled)
-                InControl.InputManager.Enabled = false;
-
-
-            if (_state != APState.Connected || _UI.ShowUI)
-            {
-                int stateIndex = (int)_state;
-                StrippedUI.BeginArea(archipelagoPanel, GUI.skin.box);
-                action = _UIActions[stateIndex](archipelagoPanel);
-                StrippedUI.EndArea();
-            }
-
-            if (_UI.ShowUI && _showDebug)
-            {
-                _debug.DrawUI(debugPanel);
-                _debug.DrawWindow(windowScreen);
-            }
-
-            if (_actionMap.TryGetValue(action, out Action uiAction))
+        // UI Actions
+        public static void ProcessAction(APUI.UIAction action)
+        {
+            if (s_Instance._actionMap.TryGetValue(action, out Action uiAction))
             {
                 uiAction();
             }
         }
-
-        // UI Actions
 
         private static void ChangeState(APState newState)
         {
@@ -185,19 +133,28 @@ namespace EOAP.Plugin.Behaviours
 
         private void StartSession()
         {
-            _session.Start(_UI.SlotName, _UI.HostnameNoPort, _UI.HostPort);
-            if (_session.Connected)
+            string host = UI.Hostname;
+            int port;
+            if (host.Contains(":"))
             {
-                ChangeState(APState.Connected);
+                string[] splitted = host.Split(':');
+                string uri = splitted[0];
+                if (int.TryParse(splitted[1], out port))
+                {
+                    _session.Start(_UI.SlotName, uri, port);
+                    if (_session.Connected)
+                    {
+                        ChangeState(APState.Connected);
+                    }
+                }
             }
         }
 
         // States Changes
         private void OnState_Connected()
         {
-            _debug.SwapToWindow(-1);
-            UI.ShowUI = false;
-            InControl.InputManager.Enabled = true;
+            UI.DisplayMenu(-1);
+            UI.SetUIVisibility(false);
             _persistentFileName = EOPersistent.GetFilePath(_session.Session.RoomState.Seed, _session.Session.ConnectionInfo.Slot);
 
             //
@@ -209,6 +166,9 @@ namespace EOAP.Plugin.Behaviours
             }
 
             LoadPersistentData();
+
+            if (EOMemory.AllowLazyLoad)
+                _session.LoadFlags(_persistent);
         }
 
         public static void SavePersistentData()

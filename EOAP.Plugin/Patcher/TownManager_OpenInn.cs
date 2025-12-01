@@ -29,6 +29,7 @@ namespace EOAP.Plugin.Patcher
             else
             {
                 GDebug.Log("Not connected to AP, cannot restore items");
+                EOMemory.AllowLazyLoad = true;
             }
         }
 
@@ -36,7 +37,7 @@ namespace EOAP.Plugin.Patcher
         {
             if (!_ripped)
             {
-                APCanvasRipper.SetupTownReferences();
+                Shinigami.SetupTownReferences();
                 _ripped = true;
                 APBehaviour.UI.CreateNotificationSystem();
             }

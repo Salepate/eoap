@@ -17,6 +17,7 @@ namespace EOAP.Plugin.AP
         public ArchipelagoSession Session { get; private set; }
 
         private List<long> _idsBuffer = new List<long>();
+        private bool _loadedFlags;
 
         public void SendGoal()
         {
@@ -25,12 +26,19 @@ namespace EOAP.Plugin.AP
                 GDebug.LogError("Cannot send Goal, not connected");
                 return;
             }
+            EOPersistent persistent = APBehaviour.GetPersistent();
+
+            if (!persistent.IsGoal)
+            {
+                APBehaviour.PushNotification("Goal!");
+            }
+
             Session.SetGoalAchieved();
             Session.SetClientState(ArchipelagoClientState.ClientGoal);
-            APBehaviour.GetPersistent().IsGoal = true;
+            persistent.IsGoal = true;
             APBehaviour.SavePersistentData();
-
         }
+
         public void SendLocation(params string[] locations)
         {
             if (!Connected)
@@ -88,6 +96,8 @@ namespace EOAP.Plugin.AP
         {
             if (Connected)
                 return;
+            APBehaviour.UI.ConnectionError = false;
+            APBehaviour.UI.ErrorMessage = string.Empty;
 
             ErrorMessage = string.Empty;
             Session = ArchipelagoSessionFactory.CreateSession(hostname, port);
@@ -112,10 +122,13 @@ namespace EOAP.Plugin.AP
                     ErrorMessage += failure.Errors[i];
                 }
                 GDebug.Log(ErrorMessage);
+                APBehaviour.UI.ErrorMessage = ErrorMessage;
+                APBehaviour.UI.ConnectionError = true;
             }
             else
             {
                 LoginSuccessful success = (LoginSuccessful)result;
+                _loadedFlags = false;
                 EOConfig.LoadSessionConfiguration(success.SlotData);
                 Session.Items.ItemReceived += OnItemReceived;
             }
@@ -168,6 +181,10 @@ namespace EOAP.Plugin.AP
 
         public void LoadFlags(EOPersistent persistent)
         {
+            if (_loadedFlags)
+                return;
+
+            _loadedFlags = true;
             SyncNewItems(persistent, true);
 
             // update persistent data 

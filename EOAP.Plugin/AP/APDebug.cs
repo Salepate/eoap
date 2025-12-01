@@ -1,6 +1,8 @@
 ﻿using Dirt.Hackit;
 using EOAP.Plugin.Behaviours;
 using EOAP.Plugin.DB;
+using EOAP.Plugin.Dirt;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Master;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -10,140 +12,29 @@ using UnityEngine.UI;
 
 namespace EOAP.Plugin.AP
 {
-
     // IMGUI UI
     public class APDebug
     {
-        //=============================================================
-        // Config: Styling
-        //=============================================================
-        private GUILayoutOption ButtonMedium;
-        private GUILayoutOption ButtonVerySmall;
-        private void SetupStyle()
+        private APUI _ui;
+        private int _menuGeneral;
+        private int _menuInspector;
+        private int _menuDataRipper;
+        private int _menuUI;
+
+        public APDebug(APUI ui)
         {
-            ButtonVerySmall = GUILayout.Width(20f);
-            ButtonMedium = GUILayout.Width(160f);
-
-            GUIStyle button = new GUIStyle();
-        }
-
-        private int _window;
-
-        private string[] _windowNames;
-        private System.Action[] _windows;
-
-        public APDebug()
-        {
-            _window = 4;
-            _windows = new System.Action[]
-            {
-                DrawGeneralDebugging,
-                DrawHierarchy,
-                DrawDataRipper,
-                DrawUI,
-                DrawWait,
-            };
-            _windowNames = ["General", "Hierarchy", "Data Ripper", "UI"];
-        }
-
-        private void DrawWait()
-        {
-            bool ignoreWait = false;
-
-            var align = GUI.skin.label.alignment;
-            int fontSize = GUI.skin.label.fontSize;
-            GUI.skin.label.fontSize = 48;
-            GUI.skin.label.fontStyle = FontStyle.Bold;
-            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-            GUILayout.Label(string.Empty);
-            GUILayout.Label(string.Empty);
-            GUILayout.Label("Connect to Archipelago First", GUILayout.Height(60f));
-            GUILayout.Label(string.Empty);
-            GUILayout.Label(string.Empty);
-
-
-            var button = GUI.skin.button;
-            int btnFntSize = button.fontSize;
-            button.fontSize = 48;
-            button.fontStyle = FontStyle.Bold;
-            ignoreWait = GUILayout.Button("Ignore", GUILayout.Height(60));
-            button.fontSize = btnFntSize;
-            button.fontStyle = FontStyle.Normal;
-            GUI.skin.label.fontSize = fontSize;
-            GUI.skin.label.fontStyle = FontStyle.Normal;
-            GUI.skin.label.alignment = align;
-
-            if (ignoreWait)
-            {
-                _window = -1;
-                APBehaviour.UI.ShowUI = false;
-                InControl.InputManager.Enabled = true;
-            }
-        }
-
-        public void DrawWindow(Rect pos)
-        {
-            if (ButtonMedium == null)
-            {
-                SetupStyle();
-            }
-            if (_window < 0 || _window >= _windows.Length)
-            {
-                return;
-            }
-            StrippedUI.BeginArea(pos, GUI.skin.box);
-            _windows[_window]();
-            StrippedUI.EndArea();
-
-        }
-
-        public void DrawUI(Rect pos)
-        {
-            int nextWindow = -1;
-            if (APBehaviour.UI.ShowDebug)
-            {
-                StrippedUI.BeginArea(pos, GUI.skin.box);
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Game Debug"))
-                {
-                    APBehaviour.UI.ShowUI = false;
-                    InControl.InputManager.Enabled = true;
-                    DebugManager.JAOFCFFEELF.Open();
-                }
-                
-                for(int i = 0; i < _windowNames.Length; ++i)
-                {
-                    if (GUILayout.Button(_windowNames[i]))
-                    {
-                        nextWindow = i;
-                    }
-                }
-                GUILayout.EndHorizontal();
-                StrippedUI.EndArea();
-            }
-
-            if (nextWindow != -1)
-                SwapToWindow(nextWindow);
-        }
-
-        public void SwapToWindow(int newWindow)
-        {
-            if (_window != newWindow)
-            {
-                _window = newWindow;
-            }
-            else
-            {
-                APBehaviour.UI.ShowUI = false;
-                InControl.InputManager.enabled = true;
-            }
+            _ui = ui;
+            _menuGeneral = ui.AddMenu(DrawGeneralDebugging, "Debug Menu");
+            _menuInspector = ui.AddMenu(DrawHierarchy, "Hierachy");
+            _menuDataRipper = ui.AddMenu(DrawDataRipper, "Data Ripper");
+            _menuUI = ui.AddMenu(DrawUI, "UI");
         }
 
         //=============================================================
         // Window: General Debugging 
         //=============================================================
         private static int _lastActivatedFlag = 0;
-        private void DrawGeneralDebugging()
+        private void DrawGeneralDebugging(Rect pos, APUI ui)
         {
             EOSession session = APBehaviour.GetSession();
             EOPersistent persistent = APBehaviour.GetPersistent();
@@ -216,7 +107,7 @@ namespace EOAP.Plugin.AP
         // Window: Canvas Ripper
         //=============================================================
         private bool _includeInactives;
-        private void DrawDataRipper()
+        private void DrawDataRipper(Rect pos, APUI ui)
         {
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
@@ -258,7 +149,7 @@ namespace EOAP.Plugin.AP
 
             if (swapToInspector)
             {
-                SwapToWindow(1);
+                _ui.DisplayMenu(_menuInspector);
             }
         }
 
@@ -273,6 +164,7 @@ namespace EOAP.Plugin.AP
         private GameObject[] _rootObjects;
         private string[] _inspectBasicComponents = System.Array.Empty<string>();
         private List<string> _additionalData = new List<string>();
+        private List<Behaviour> _inspectedBehaviours = new List<Behaviour>();
         private static int _lastTreasureBox;
 
         private void SetList(GameObject[] list)
@@ -281,7 +173,7 @@ namespace EOAP.Plugin.AP
             _inspectedObject = null;
             _page = 0;
         }
-        private void DrawHierarchy()
+        private void DrawHierarchy(Rect pos, APUI ui)
         {
             if (_rootObjects == null)
             {
@@ -328,7 +220,7 @@ namespace EOAP.Plugin.AP
                     }
                     else
                     {
-                        if (GUILayout.Button(_rootObjects[index].name, ButtonMedium))
+                        if (StyleUI.ButtonM(_rootObjects[index].name))
                         {
                             targetObject = _rootObjects[index];
                         }
@@ -351,7 +243,7 @@ namespace EOAP.Plugin.AP
                     else
                     {
                         GameObject childObject = _inspectedObject.transform.GetChild(index).gameObject;
-                        if (GUILayout.Button(childObject.name, ButtonMedium))
+                        if (StyleUI.ButtonM(childObject.name))
                         {
                             targetObject = childObject;
                         }
@@ -375,6 +267,15 @@ namespace EOAP.Plugin.AP
                 bool toggleGO = GUILayout.Button("Toggle Active [" + _inspectedObject.activeSelf + "]");
                 if (toggleGO)
                     _inspectedObject.SetActive(!_inspectedObject.activeSelf);
+
+                for(int i = 0; i < _inspectedBehaviours.Count; ++i)
+                {
+                    Behaviour bhv = _inspectedBehaviours[i];
+                    if (GUILayout.Button($"{bhv.GetIl2CppType().Name} [{bhv.enabled}]"))
+                    {
+                        bhv.enabled = !bhv.enabled;
+                    }
+                }
 
                 if (GUILayout.Button("Full Dump"))
                 {
@@ -426,20 +327,20 @@ namespace EOAP.Plugin.AP
 
             GUI.enabled = guiState && _page > 0;
             GUILayout.BeginHorizontal(GUI.skin.box);
-            if (GUILayout.Button("<", ButtonVerySmall))
+            if (StyleUI.ButtonXS("<"))
                 _page--;
 
             GUI.enabled = guiState;
             for (int i = 0; i < pages; ++i)
             {
-                if (GUILayout.Button(i.ToString(), ButtonVerySmall))
+                if (StyleUI.ButtonXS(i.ToString()))
                 {
                     _page = i;
                 }
             }
 
             GUI.enabled = guiState && _page < pages - 1;
-            if (GUILayout.Button(">", ButtonVerySmall))
+            if (StyleUI.ButtonXS(">"))
             {
                 _page++;
             }
@@ -451,17 +352,47 @@ namespace EOAP.Plugin.AP
         {
             Text cText; TMP_Text cText2; Image cImage;
 
+            Il2CppArrayBase<Component> allComps = go.GetComponents<Component>();
+            _inspectedBehaviours.Clear();
+            for(int i = 0; i < allComps.Count; ++i)
+            {
+                Component comp = allComps[i];
+                Behaviour bhv = comp.TryCast<Behaviour>();
+                if (bhv != null)
+                {
+                    _inspectedBehaviours.Add(bhv);
+                }
+            }
+
             List<string> foundComponents = new List<string>();
             _additionalData.Clear();
             GDebug.Log(GOResolver.GetPath(go));
             if (go != null)
             {
-                for(int i = 0; i < BasicComponents.Length; ++i)
+                string layerName = LayerMask.LayerToName(go.layer);
+                if (string.IsNullOrEmpty(layerName))
+                    layerName = go.layer.ToString();
+                else
+                    layerName += $" ({go.layer})";
+
+                _additionalData.Add(layerName);
+
+                RectTransform rectTr = go.GetComponent<RectTransform>();
+                if (rectTr != null)
                 {
-                    Component c = go.GetComponentByName(BasicComponents[i].Name);
+                    _additionalData.Add($"RectTr.anchorMin: {rectTr.anchorMin}");
+                    _additionalData.Add($"RectTr.anchorMax: {rectTr.anchorMax}");
+                    _additionalData.Add($"RectTr.anchoredPosition: {rectTr.anchoredPosition}");
+                    _additionalData.Add($"RectTr.pivot: {rectTr.pivot}");
+                    _additionalData.Add($"RectTr.sizeDelta: {rectTr.sizeDelta}");
+                    _additionalData.Add($"RectTr.scale: {rectTr.localScale}");
+                }
+
+                for (int i = 0; i < BasicComponents.Length; ++i)
+                {
+                    Component c =  go.GetComponentByName(BasicComponents[i].Name);
                     if (c != null)
                     {
-                        foundComponents.Add(BasicComponents[i].Name);
                         if ((cText = c.TryCast<Text>()) != null)
                         {
                             _additionalData.Add($"Text: {cText.text}");
@@ -487,25 +418,22 @@ namespace EOAP.Plugin.AP
         // Window: Game UI
         //=============================================================
 
-        private void DrawUI()
+        private void DrawUI(Rect pos, APUI ui)
         {
             bool guiState = GUI.enabled;
-
-
-
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(200f));
             GUILayout.Label("Canvas");
-            ShowActiveToggle(APCanvasRipper.TitleUI, "Title UI");
-            ShowActiveToggle(APCanvasRipper.GameHUD, "Game HUD");
-            ShowActiveToggle(APCanvasRipper.InnUI, "Inn");
-            ShowActiveToggle(APCanvasRipper.InputTextWindow, "Input Text");
+            ShowActiveToggle(Shinigami.TitleUI, "Title UI");
+            ShowActiveToggle(Shinigami.GameHUD, "Game HUD");
+            ShowActiveToggle(Shinigami.InnUI, "Inn");
+            ShowActiveToggle(Shinigami.InputTextWindow, "Input Text");
             GUILayout.EndVertical();
             GUILayout.BeginVertical(GUI.skin.box);
             GUILayout.Label("Sprites");
-            ShowSpriteName(APCanvasRipper.NotificationSprite);
+            ShowSpriteName(Shinigami.NotificationSprite);
             if (GUILayout.Button("Updates Refs"))
-                APCanvasRipper.SetupTownReferences();
+                Shinigami.SetupTownReferences();
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
             if (GUILayout.Button("Test Keyboard"))
@@ -513,7 +441,7 @@ namespace EOAP.Plugin.AP
                 // Show Ingame Keyboard
                 //TextInput tpInput = Il2CppSystem.Activator.CreateInstance<TextInput>();
                 //tpInput.ShowKeyboard(null, null, 1, 1, true, true, "ok");
-                APCanvasRipper.InputTextWindow.Open(string.Empty, string.Empty, 64);
+                Shinigami.InputTextWindow.Open(string.Empty, string.Empty, 64);
             }
             if (GUILayout.Button("Test Notification"))
             {
@@ -527,7 +455,7 @@ namespace EOAP.Plugin.AP
             }
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
-            for (APCanvasRipper.SFX sfx = APCanvasRipper.SFX.SystemOk; sfx <= APCanvasRipper.SFX.ClearMap; ++sfx)
+            for (Shinigami.SFX sfx = Shinigami.SFX.SystemOk; sfx <= Shinigami.SFX.ClearMap; ++sfx)
             {
                 if (GUILayout.Button(sfx.ToString()))
                 {
@@ -566,6 +494,5 @@ namespace EOAP.Plugin.AP
             }
             GUI.enabled = guiState;
         }
-
     }
 }
