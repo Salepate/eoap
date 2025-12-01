@@ -1,5 +1,5 @@
-﻿using EOAP.Plugin.AP;
-using EOAP.Plugin.Behaviours;
+﻿using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.EO;
 using HarmonyLib;
 using Town;
 
@@ -23,7 +23,7 @@ namespace EOAP.Plugin.Patcher
 
         public static bool Buy_Prefix(ShopBuyMenu __instance, int GBKKIPAKICJ, bool ACINHONNBOB, int MEJKMPOGAEN = 1)
         {
-            AP.EOSession session = APBehaviour.GetSession();
+            EOSession session = APBehaviour.GetSession();
             // TODO: Apply this Patch only after connecting to a session
             if (session == null || !session.Connected)
                 return true;
@@ -36,7 +36,7 @@ namespace EOAP.Plugin.Patcher
             if (locID > 0)
             {
                 bool sendLoc = false;
-                AP.EOPersistent persistent = APBehaviour.GetPersistent();
+                EOPersistent persistent = APBehaviour.GetPersistent();
                 if (!persistent.CompleteLocations.Contains(locID))
                 {
                     GoldItem.GetBasicItemData((ITEM_NO)itemID, out GoldItem.BASIC_ITEM_DATA itemData);

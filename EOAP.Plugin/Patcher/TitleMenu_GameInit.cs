@@ -1,7 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
-using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.EO;
 using HarmonyLib;
 using Title;
 

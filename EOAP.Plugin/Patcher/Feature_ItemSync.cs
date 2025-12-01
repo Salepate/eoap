@@ -2,6 +2,7 @@
 using DungeonData;
 using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.EO;
 using HarmonyLib;
 using Master;
 using System;

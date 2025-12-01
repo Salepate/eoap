@@ -1,5 +1,5 @@
-﻿using EOAP.Plugin.AP;
-using EOAP.Plugin.Behaviours;
+﻿using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.EO;
 using HarmonyLib;
 using Town;
 using static ItemNoEnum;

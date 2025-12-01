@@ -1,4 +1,4 @@
-﻿using EOAP.Plugin.AP;
+﻿using EOAP.Plugin.EO;
 using HarmonyLib;
 
 namespace EOAP.Plugin.Patcher

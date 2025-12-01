@@ -1,5 +1,6 @@
 ﻿using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.EO;
 using HarmonyLib;
 using Il2CppSystem.Runtime.InteropServices;
 using MonoMod.RuntimeDetour;
