@@ -10775,7 +10775,49 @@
       },
       {
         "ID": 127,
-        "Data": [ "B1F Main - Moles Whitestone"]
+        "Data": [ "B1F Main - Moles Whitestone" ]
+      }
+    ],
+    "TreasureBoxes": [
+      {
+        "ID": 0,
+        "Data": [ "B1F East - North Chest" ]
+      },
+      {
+        "ID": 1,
+        "Data": [ "B1F Main - A3 Top Chest" ]
+      },
+      {
+        "ID": 2,
+        "Data": [ "B1F Clear Crystal Room - Chest" ]
+      },
+      {
+        "ID": 3,
+        "Data": [ "B1F Main - A3 Middle Chest" ]
+      },
+      {
+        "ID": 4,
+        "Data": [ "B1F Main - A3 Bottom Chest" ]
+      },
+      {
+        "ID": 5,
+        "Data": [ "B1F East - Ragelope Top Chest" ]
+      },
+      {
+        "ID": 6,
+        "Data": [ "B1F East - Ragelope Middle Chest" ]
+      },
+      {
+        "ID": 7,
+        "Data": [ "B1F Violet Crystal Room - Top Chest" ]
+      },
+      {
+        "ID": 8,
+        "Data": [ "B1F Violet Crystal Room - Bottom Chest" ]
+      },
+      {
+        "ID": 9,
+        "Data": [ "B1F East - Ragelope Bottom Chest" ]
       }
     ]
   }

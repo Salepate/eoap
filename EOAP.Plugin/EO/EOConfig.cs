@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EOAP.Plugin.AP
+namespace EOAP.Plugin.EO
 {
     public static class EOConfig
     {
@@ -22,7 +22,7 @@ namespace EOAP.Plugin.AP
 
         private static Dictionary<string, System.Action<long>> s_Configurations;
 
-        public static void LoadSessionConfiguration(Dictionary<string,object> slotData)
+        public static void LoadSessionConfiguration(Dictionary<string, object> slotData)
         {
             try
             {
@@ -37,7 +37,8 @@ namespace EOAP.Plugin.AP
                         GDebug.LogError("unknown world settings: {0} ({1})", entry.Key, entry.Value);
                     }
                 }
-            } catch(System.Exception e)
+            }
+            catch (System.Exception e)
             {
                 GDebug.LogError("Failed to load slot data properly:\n" + e.Message);
             }
@@ -47,7 +48,7 @@ namespace EOAP.Plugin.AP
             s_Configurations = new Dictionary<string, System.Action<long>>()
             {
                 { "starting_money", (v) => StartingEntal = (int) v },
-                { "shop_sanity", (v) => ShopSanity = (v != 0) },
+                { "shop_sanity", (v) => ShopSanity = v != 0 },
                 { "price_mode", (v) => UseOverride = (int) v == 1 },
                 { "price_percent_value", (v) => PriceScale = (int)v },
                 { "price_flat_value", (v) => PriceOverride = (int)v },
@@ -55,6 +56,5 @@ namespace EOAP.Plugin.AP
                 { "goal_mission", (v) => GoalMission = (int)v }
             };
         }
-
     }
 }

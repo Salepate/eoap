@@ -4,6 +4,7 @@ using Archipelago.MultiClient.Net.Helpers;
 using Dirt.Hackit;
 using EOAP.Plugin.Behaviours;
 using EOAP.Plugin.Dirt;
+using EOAP.Plugin.EO;
 using System;
 using System.Collections.Generic;
 using System.Linq;

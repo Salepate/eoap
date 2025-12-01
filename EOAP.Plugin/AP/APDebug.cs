@@ -2,6 +2,7 @@
 using EOAP.Plugin.Behaviours;
 using EOAP.Plugin.DB;
 using EOAP.Plugin.Dirt;
+using EOAP.Plugin.EO;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Master;
 using Newtonsoft.Json;
@@ -61,7 +62,7 @@ namespace EOAP.Plugin.AP
             GUILayout.Label($"Last Activated Flag: {_lastActivatedFlag}");
             if (GUILayout.Button("Reset All Known Flags"))
             {
-                var flags = Builder.GetTable("Flags");
+                var flags = Builder.GetTable(EO1.FlagTable);
                 for (int i = 0; i < flags.Count; ++i)
                     EventFlagTbl.SetEventFlag(flags[i].ID, false);
             }
@@ -81,7 +82,7 @@ namespace EOAP.Plugin.AP
             GUILayout.BeginVertical(GUILayout.Width(200f));
             if (GUILayout.Button("Save DynDB"))
             {
-                Builder.Dump(EOItems.DynDBPath);
+                Builder.Dump(EO1.DynDBPath);
             }
             GUILayout.EndVertical();
             GUILayout.BeginVertical();

@@ -1,6 +1,6 @@
 ﻿using Dirt.Common;
 
-namespace EOAP.Plugin.AP
+namespace EOAP.Plugin.EO
 {
     public static class EOMemory
     {

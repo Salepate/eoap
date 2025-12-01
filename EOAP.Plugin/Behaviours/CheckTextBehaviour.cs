@@ -2,6 +2,7 @@
 using Camp;
 using DG.Tweening;
 using EOAP.Plugin.AP;
+using EOAP.Plugin.EO;
 using Il2CppInterop.Runtime;
 using System;
 using UnityEngine;

@@ -8,15 +8,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace EOAP.Plugin.AP
+namespace EOAP.Plugin.EO
 {
     public class EOSession
     {
-        public string ErrorMessage { get; private set; }
         public bool Connected { get; private set; }
         public ArchipelagoSession Session { get; private set; }
 
-        private List<long> _idsBuffer = new List<long>();
         private bool _loadedFlags;
 
         public void SendGoal()
@@ -46,11 +44,11 @@ namespace EOAP.Plugin.AP
                 GDebug.LogError("Cannot send locations AP, not connected");
                 return;
             }
-            _idsBuffer.Clear();
+            List<long> _idsBuffer = new List<long>();
             EOPersistent persistentData = APBehaviour.GetPersistent();
 
             string firstCheckName = string.Empty;
-            for(int i = 0; i < locations.Length; ++i)
+            for (int i = 0; i < locations.Length; ++i)
             {
                 long id = Session.Locations.GetLocationIdFromName(EO1.WorldName, locations[i]);
                 if (id <= 0)
@@ -62,8 +60,6 @@ namespace EOAP.Plugin.AP
                     if (string.IsNullOrEmpty(firstCheckName))
                         firstCheckName = locations[i];
                     _idsBuffer.Add(id);
-                    //if (!persistentData.CompleteLocations.Contains(id))
-                    //    APBehaviour.PushNotification($"Checked {locations[i]}");
                 }
             }
 
@@ -99,7 +95,7 @@ namespace EOAP.Plugin.AP
             APBehaviour.UI.ConnectionError = false;
             APBehaviour.UI.ErrorMessage = string.Empty;
 
-            ErrorMessage = string.Empty;
+            string errorMessage = string.Empty;
             Session = ArchipelagoSessionFactory.CreateSession(hostname, port);
             Session.MessageLog.OnMessageReceived += OnMessageReceived;
             System.Version worldVersion = new System.Version(0, 6, 4);
@@ -108,9 +104,9 @@ namespace EOAP.Plugin.AP
             {
                 result = Session.TryConnectAndLogin("Etrian Odyssey HD", slotName, ItemsHandlingFlags.AllItems, requestSlotData: true, version: worldVersion);
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
-                ErrorMessage += e.Message + "\n";
+                errorMessage += e.Message + "\n";
                 result = new LoginFailure("Exception");
             }
 
@@ -119,10 +115,10 @@ namespace EOAP.Plugin.AP
                 LoginFailure failure = (LoginFailure)result;
                 for (int i = 0; i < failure.Errors.Length; ++i)
                 {
-                    ErrorMessage += failure.Errors[i];
+                    errorMessage += failure.Errors[i];
                 }
-                GDebug.Log(ErrorMessage);
-                APBehaviour.UI.ErrorMessage = ErrorMessage;
+                GDebug.Log(errorMessage);
+                APBehaviour.UI.ErrorMessage = errorMessage;
                 APBehaviour.UI.ConnectionError = true;
             }
             else
@@ -188,7 +184,7 @@ namespace EOAP.Plugin.AP
             SyncNewItems(persistent, true);
 
             // update persistent data 
-            for(int i = 0; i < Session.Locations.AllLocationsChecked.Count; ++i)
+            for (int i = 0; i < Session.Locations.AllLocationsChecked.Count; ++i)
             {
                 persistent.AddLocation(Session.Locations.AllLocationsChecked[i]);
             }
@@ -199,7 +195,7 @@ namespace EOAP.Plugin.AP
             // prepare fast memory for ingame patches
             EOMemory.PrepareMemory();
             Dictionary<long, int> reverseMap = new Dictionary<long, int>();
-            foreach(var shopLocKVP in EOItems.GameItems)
+            foreach (var shopLocKVP in EO1.GameItems)
             {
                 long locID = Session.Locations.GetLocationIdFromName(EO1.WorldName, EO1.GetShopLocation(shopLocKVP.Key));
                 if (locID < 0)
@@ -218,7 +214,7 @@ namespace EOAP.Plugin.AP
             System.Threading.Tasks.Task<Dictionary<long, ScoutedItemInfo>> req = Session.Locations.ScoutLocationsAsync(reverseMap.Keys.ToArray());
             req.Wait();
             Dictionary<long, ScoutedItemInfo> result = req.Result;
-            foreach(var hintKVP in result)
+            foreach (var hintKVP in result)
             {
                 int itemIndex = reverseMap[hintKVP.Key];
                 ScoutedItemInfo itemHint = hintKVP.Value;
@@ -228,7 +224,7 @@ namespace EOAP.Plugin.AP
 
         // Multiclient Callbacks
 
-        
+
         private void OnItemReceived(ReceivedItemsHelper helper)
         {
             EOPersistent persistent = APBehaviour.GetPersistent();
@@ -251,9 +247,9 @@ namespace EOAP.Plugin.AP
             {
                 if (sendLogMessage is not HintItemSendLogMessage && sendLogMessage.IsSenderTheActivePlayer && !sendLogMessage.IsReceiverTheActivePlayer)
                 {
-                    string? itemName = sendLogMessage.Item.ItemName;
-                    string? messageText;
-                    string? otherPlayer = Session.Players.GetPlayerAlias(sendLogMessage.Receiver.Slot);
+                    string itemName = sendLogMessage.Item.ItemName;
+                    string messageText;
+                    string otherPlayer = Session.Players.GetPlayerAlias(sendLogMessage.Receiver.Slot);
                     messageText = $"Sent {itemName} to {otherPlayer}.";
                     APBehaviour.PushNotification(messageText);
                 }

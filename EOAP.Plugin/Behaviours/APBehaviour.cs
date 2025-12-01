@@ -1,5 +1,6 @@
 ﻿using EOAP.Plugin.AP;
 using EOAP.Plugin.Dirt;
+using EOAP.Plugin.EO;
 using EOAP.Plugin.Patcher;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -53,7 +54,7 @@ namespace EOAP.Plugin.Behaviours
             _state = APState.Offline;
             _session = new EOSession();
             // DB 
-            EOItems.LoadDatabase();
+            EO1.LoadDatabase();
             // UI Views
             _UI = new APUI();
             _UI.ShowDebug = connectionFile.DebugUtils;

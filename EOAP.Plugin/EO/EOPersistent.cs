@@ -3,7 +3,7 @@ using EOAP.Plugin.Behaviours;
 using System.Collections.Generic;
 using System.IO;
 
-namespace EOAP.Plugin.AP
+namespace EOAP.Plugin.EO
 {
     [System.Serializable]
     public class EOPersistent
@@ -43,7 +43,7 @@ namespace EOAP.Plugin.AP
                 }
             }
 
-            while(PendingItems.Count > 0 && GoldItem.GetPartyCarryItemAllNum() < EOConfig.InventoryLimit)
+            while (PendingItems.Count > 0 && GoldItem.GetPartyCarryItemAllNum() < EOConfig.InventoryLimit)
             {
                 AddGameItem(PendingItems[0]);
                 PendingItems.RemoveAt(0);
@@ -62,11 +62,11 @@ namespace EOAP.Plugin.AP
             {
                 GoldItem.AddPartyItem((ItemNoEnum.ITEM_NO)itemIndex);
             }
-            else if (EOItems.CustomItems.TryGetValue(itemIndex, out var customAddAction))
+            else if (EO1.CustomItems.TryGetValue(itemIndex, out var customAddAction))
             {
                 customAddAction(itemIndex);
             }
-            else 
+            else
             {
                 ItemInfo item = APBehaviour.GetSession().GetItemInfo(itemIndex);
                 GDebug.Log($"Unsupported Item {item.ItemDisplayName}");
