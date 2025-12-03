@@ -82,5 +82,29 @@ namespace EOAP.Plugin.AP
             NotificationSprite = img?.sprite;
             NotificationSpriteColor = img.color;
         }
+
+        public static void ReapObject<T>(in T obj) where T : struct
+        {
+            var flds = obj.GetType().GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+
+            GDebug.Log($"Reap {obj.GetType().Name}:");
+            for (int i = 0; i < flds.Length; ++i)
+            {
+                System.Reflection.FieldInfo fld = flds[i];
+                GDebug.Log($"{fld.Name} ({fld.FieldType.Name} : {fld.GetValue(obj)}");
+            }
+        }
+
+        public static void ReapNativeObject<T>(in T obj) where T: Il2CppSystem.Type
+        {
+            var flds = obj.GetIl2CppType().GetFields(Il2CppSystem.Reflection.BindingFlags.Instance | Il2CppSystem.Reflection.BindingFlags.Public);
+
+            GDebug.Log($"Reap {obj.GetIl2CppType().Name}:");
+            for(int i = 0; i < flds.Length; ++i)
+            {
+                Il2CppSystem.Reflection.FieldInfo fld = flds[i];
+                GDebug.Log($"{fld.Name} ({fld.FieldType.Name} : {fld.GetValue(obj)}");
+            }
+        }
     }
 }
