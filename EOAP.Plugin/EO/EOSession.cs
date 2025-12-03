@@ -193,7 +193,6 @@ namespace EOAP.Plugin.EO
             Session.Locations.CompleteLocationChecks(persistent.CompleteLocations.ToArray());
 
             // prepare fast memory for ingame patches
-            EOMemory.PrepareMemory();
             Dictionary<long, int> reverseMap = new Dictionary<long, int>();
             foreach (var shopLocKVP in EO1.GameItems)
             {
@@ -203,7 +202,8 @@ namespace EOAP.Plugin.EO
 
                 if (Session.Locations.AllLocationsChecked.Contains(locID))
                 {
-                    EOMemory.ShopLocations[shopLocKVP.Key] = true;
+                    ref ItemCustom itemData = ref EOMemory.GetItem(shopLocKVP.Key);
+                    itemData.Checked = true;
                 }
                 else
                 {
@@ -216,9 +216,10 @@ namespace EOAP.Plugin.EO
             Dictionary<long, ScoutedItemInfo> result = req.Result;
             foreach (var hintKVP in result)
             {
-                int itemIndex = reverseMap[hintKVP.Key];
+                int itemID = reverseMap[hintKVP.Key];
                 ScoutedItemInfo itemHint = hintKVP.Value;
-                EOMemory.ShopHint[itemIndex] = itemHint.ItemDisplayName;
+                ref ItemCustom itemData = ref EOMemory.GetItem(itemID);
+                itemData.Hint = itemHint.ItemDisplayName;
             }
         }
 

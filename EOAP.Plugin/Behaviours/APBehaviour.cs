@@ -82,6 +82,13 @@ namespace EOAP.Plugin.Behaviours
                 BoredomSkip.Patch(patcher);
                 _patchers.Add(patcher);
             }
+
+            if (configFile.InfiniteFlyWing)
+            {
+                patcher = new Harmony("eoap.infiniteflywing");
+                InfiniteFlyWing.Patch(patcher);
+                _patchers.Add(patcher);
+            }
             // DBG
 #if AP_DEBUG
             _debug = new APDebug(_UI);

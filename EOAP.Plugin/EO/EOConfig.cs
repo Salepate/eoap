@@ -14,7 +14,7 @@ namespace EOAP.Plugin.EO
         public static int GoalMission = 0; //
         public static bool GoalTypeMission = true;
 
-        public static uint XPPercent; // experience modifier (%)
+        public static uint XPPercent = 100; // experience modifier (%)
         public static int StartingEntal = 1000; // default values
         public static int PriceOverride = -1;
         public static int PriceScale = 100;

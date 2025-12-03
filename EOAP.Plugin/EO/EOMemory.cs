@@ -5,24 +5,23 @@ namespace EOAP.Plugin.EO
     public static class EOMemory
     {
         public static int ShopMenuItemIndex = -1;
-        public static bool[] ShopLocations = System.Array.Empty<bool>();
-        public static string[] ShopHint = System.Array.Empty<string>();
 
+        public static ItemCustom Invalid = new ItemCustom() { Checked = true, Hint = "Invalid", Infinite = false };
+        public static ItemCustom[] Items;
         public static bool AllowLazyLoad { get; internal set; }
 
-        public static void PrepareMemory()
+        static EOMemory()
         {
-            ShopLocations = EnumUtility.CreateArray<bool, ItemNoEnum.ITEM_NO>();
-            ShopHint = EnumUtility.CreateArray<string, ItemNoEnum.ITEM_NO>();
+            Items = EnumUtility.CreateArray<ItemCustom, ItemNoEnum.ITEM_NO>();
+        }
+        public static ref ItemCustom GetItem(int no) => ref GetItem((ItemNoEnum.ITEM_NO)no);
+        public static ref ItemCustom GetItem(ItemNoEnum.ITEM_NO no)
+        {
+            if (no >= 0 && (int) no < Items.Length)
+                return ref Items[(int)no];
+            return ref Invalid;
         }
 
-        public static bool IsMissingLocation(ItemNoEnum.ITEM_NO no)
-        {
-            int itemIndex = (int)no;
-            if (itemIndex >= 0 && itemIndex < ShopLocations.Length)
-                return !ShopLocations[itemIndex];
-
-            return false;
-        }
+        public static bool IsMissingLocation(ItemNoEnum.ITEM_NO no) => !GetItem(no).Checked;
     }
 }

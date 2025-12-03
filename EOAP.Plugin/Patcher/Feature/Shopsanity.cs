@@ -27,8 +27,9 @@ namespace EOAP.Plugin.Patcher.Feature
                 return true;
 
             bool invokeOriginal = true;
-
             int itemID = GBKKIPAKICJ;
+            ref ItemCustom itemData = ref EOMemory.GetItem(itemID);
+
             string loc = EO1.GetShopLocation(itemID);
             long locID = session.GetLocationId(loc);
             if (locID > 0)
@@ -37,15 +38,15 @@ namespace EOAP.Plugin.Patcher.Feature
                 EOPersistent persistent = APBehaviour.GetPersistent();
                 if (!persistent.CompleteLocations.Contains(locID))
                 {
-                    GoldItem.GetBasicItemData((ITEM_NO)itemID, out GoldItem.BASIC_ITEM_DATA itemData);
-                    uint price = EO1.GetNewPrice(itemData.GMDGMCMPOHE);
+                    GoldItem.GetBasicItemData((ITEM_NO)itemID, out GoldItem.BASIC_ITEM_DATA itemDataBase);
+                    uint price = EO1.GetNewPrice(itemDataBase.GMDGMCMPOHE);
                     sendLoc = GoldItem.PayGold(price);
                     invokeOriginal = false; // no buy
                 }
 
                 if (sendLoc)
                 {
-                    EOMemory.ShopLocations[itemID] = true; // update fast mem
+                    itemData.Checked = true;
                     APBehaviour.GetSession().SendLocation(loc); // force resend loc anyway
                 }
             }
@@ -77,7 +78,8 @@ namespace EOAP.Plugin.Patcher.Feature
                 long locID = session.GetLocationId(loc);
                 if (locID > 0 && !persistent.CompleteLocations.Contains(locID))
                 {
-                    string hint = EOMemory.ShopHint[itemID] ?? $"AP Item {locID}";
+                    ref ItemCustom itemData = ref EOMemory.GetItem(itemID);
+                    string hint = !string.IsNullOrEmpty(itemData.Hint) ? itemData.Hint : $"AP Item {locID}";
                     item.CHMMJIGJPPC = hint;
                     item.CFMADGGDPDB = ItemType.eITEM_KIND.ITEM_KIND_ETC;
                     item.PFDNJNEFKMK = true;

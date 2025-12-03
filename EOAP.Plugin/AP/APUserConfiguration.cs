@@ -14,7 +14,7 @@ namespace EOAP.Plugin.AP
         public bool DebugUtils;
         public bool FastQuit;
         public bool SkipTutorials;
-
+        public bool InfiniteFlyWing;
         public static bool FileExists { get; internal set; }
 
         public void SaveConnectionFile()
