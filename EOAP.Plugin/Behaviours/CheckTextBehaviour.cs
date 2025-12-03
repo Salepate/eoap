@@ -1,9 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.Helpers;
 using Camp;
-using DG.Tweening;
 using EOAP.Plugin.AP;
 using EOAP.Plugin.EO;
-using Il2CppInterop.Runtime;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,6 +66,7 @@ namespace EOAP.Plugin.Behaviours
 
             Transform checkRoot = gatherCopy.transform.GetChild(2);
             CheckTextBehaviour bhv = checkRoot.gameObject.AddComponent<CheckTextBehaviour>();
+            gatherCopy.transform.SetParent(Shinigami.GatherHUD, true); // apply gatherhud animations 
             return bhv;
         }
     }

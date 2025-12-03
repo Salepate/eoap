@@ -3,22 +3,20 @@ using EOAP.Plugin.EO;
 using HarmonyLib;
 using Town;
 
-namespace EOAP.Plugin.Patcher
+namespace EOAP.Plugin.Patcher.Feature
 {
     using ITEM_NO = ItemNoEnum.ITEM_NO;
-
-
     public static class ShopsanityFeature
     {
         public static void Patch(Harmony patcher)
         {
             GDebug.Log("Activating Shopsanity");
             patcher.Patch(typeof(ShopBuyMenu).GetMethod(nameof(ShopBuyMenu.Buy)),
-                prefix: new HarmonyMethod(typeof(ShopsanityFeature), nameof(ShopsanityFeature.Buy_Prefix)));
+                prefix: new HarmonyMethod(typeof(ShopsanityFeature), nameof(Buy_Prefix)));
             patcher.Patch(typeof(ShopBuyMenu).GetMethod(nameof(ShopBuyMenu.GetTabDataList)),
-                postfix: new HarmonyMethod(typeof(ShopsanityFeature), nameof(ShopsanityFeature.GetTabDataList_Postfix)));
+                postfix: new HarmonyMethod(typeof(ShopsanityFeature), nameof(GetTabDataList_Postfix)));
             patcher.Patch(typeof(ShopBuyMenu).GetMethod(nameof(ShopBuyMenu.GetEquippableItemsCount)),
-                prefix: new HarmonyMethod(typeof(ShopsanityFeature), nameof(ShopsanityFeature.GetEquippableItemsCount_Prefix)));
+                prefix: new HarmonyMethod(typeof(ShopsanityFeature), nameof(GetEquippableItemsCount_Prefix)));
         }
 
         public static bool Buy_Prefix(ShopBuyMenu __instance, int GBKKIPAKICJ, bool ACINHONNBOB, int MEJKMPOGAEN = 1)
@@ -40,7 +38,7 @@ namespace EOAP.Plugin.Patcher
                 if (!persistent.CompleteLocations.Contains(locID))
                 {
                     GoldItem.GetBasicItemData((ITEM_NO)itemID, out GoldItem.BASIC_ITEM_DATA itemData);
-                    uint price = ItemOverride.GetNewPrice(itemData.GMDGMCMPOHE);
+                    uint price = EO1.GetNewPrice(itemData.GMDGMCMPOHE);
                     sendLoc = GoldItem.PayGold(price);
                     invokeOriginal = false; // no buy
                 }
@@ -92,7 +90,7 @@ namespace EOAP.Plugin.Patcher
         /// </summary>
         public static bool GetEquippableItemsCount_Prefix(ShopBuyMenu __instance, ref int __result)
         {
-            if (EOMemory.IsMissingLocation((ItemNoEnum.ITEM_NO)EOMemory.ShopMenuItemIndex))
+            if (EOMemory.IsMissingLocation((ITEM_NO)EOMemory.ShopMenuItemIndex))
             {
                 __result = 0; // will display "Cannot be equipped"
                 return false;

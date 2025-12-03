@@ -58,7 +58,7 @@ namespace EOAP.Plugin.AP
 
             if (ignoreWait)
             {
-                ui.DisplayMenu(-1);
+                ui.SetWindow(-1);
                 ui.SetUIVisibility(false);
             }
             if (ignoreQuit)

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using static Master.MasterManager;
+﻿using System.Collections.Generic;
 
 namespace EOAP.Plugin.DB
 {
@@ -24,7 +22,6 @@ namespace EOAP.Plugin.DB
             return entries;
         }
 
-
         public static bool GetEntry(in List<Entry> table, int entryID, out int tableIndex)
         {
             for(int i = 0; i < table.Count; ++i)
@@ -38,7 +35,6 @@ namespace EOAP.Plugin.DB
             tableIndex = -1;
             return false;
         }
-
         internal void SortByID()
         {
             var oldTables = Tables;
@@ -52,7 +48,6 @@ namespace EOAP.Plugin.DB
             }
         }
     }
-
 
     [System.Serializable]
     public struct Entry

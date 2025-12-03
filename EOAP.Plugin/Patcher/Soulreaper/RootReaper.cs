@@ -2,10 +2,10 @@
 using HarmonyLib;
 using Title;
 
-namespace EOAP.Plugin.Patcher
+namespace EOAP.Plugin.Patcher.Soulreaper
 {
     [HarmonyPatch(typeof(TitleMenu), nameof(TitleMenu.Open))]
-    public class TitleMenu_Open
+    public class RootReaper
     {
         public static void Prefix()
         {

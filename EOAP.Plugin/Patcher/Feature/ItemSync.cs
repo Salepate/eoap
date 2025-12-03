@@ -1,16 +1,13 @@
 ﻿using Camp;
-using DungeonData;
-using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
 using EOAP.Plugin.EO;
 using HarmonyLib;
 using Master;
 using System;
-using static Master.Event;
 
-namespace EOAP.Plugin.Patcher
+namespace EOAP.Plugin.Patcher.Feature
 {
-    public class Feature_ItemSync
+    public class ItemSync
     {
         public static Tuple<Type, string>[] Injectors = new Tuple<Type, string>[]
         {
@@ -20,8 +17,8 @@ namespace EOAP.Plugin.Patcher
 
         public static void Patch(Harmony patcher)
         {
-            HarmonyMethod injector = new HarmonyMethod(typeof(Feature_ItemSync), nameof(Feature_ItemSync.Prefix));
-            for(int i = 0; i < Injectors.Length; ++i)
+            HarmonyMethod injector = new HarmonyMethod(typeof(ItemSync), nameof(Prefix));
+            for (int i = 0; i < Injectors.Length; ++i)
             {
                 Tuple<Type, string> tuple = Injectors[i];
                 patcher.Patch(tuple.Item1.GetMethod(tuple.Item2), prefix: injector);
@@ -30,16 +27,6 @@ namespace EOAP.Plugin.Patcher
         public static void Prefix()
         {
             APBehaviour.GetPersistent().InjectItems();
-        }
-    }
-
-    [HarmonyPatch(typeof(DungeonTreasureState), nameof(DungeonTreasureState.TreasureOpenCheckFunc))]
-    public class AutoPatch_DungeonTreasureState_TreasureOpenCheckFunc
-    {
-        public static void Prefix(DungeonTreasureState __instance)
-        {
-            DungeonData.TBData treasureBox = __instance.KOHPIHBMMIC;
-            APDebug.PrintTreasureBox((int) treasureBox.TbId);
         }
     }
 

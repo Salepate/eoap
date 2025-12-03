@@ -2,10 +2,10 @@
 using EOAP.Plugin.EO;
 using HarmonyLib;
 
-namespace EOAP.Plugin.Patcher
+namespace EOAP.Plugin.Patcher.Feature
 {
     [HarmonyPatch(typeof(DungeonTreasureState), nameof(DungeonTreasureState.GetItemFunc))]
-    public class DungeonTreasureState_GetItemFunc
+    public class TreasureBox
     {
         public static bool Prefix(DungeonTreasureState __instance)
         {

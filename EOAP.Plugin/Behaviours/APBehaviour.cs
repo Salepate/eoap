@@ -1,7 +1,8 @@
 ﻿using EOAP.Plugin.AP;
 using EOAP.Plugin.Dirt;
 using EOAP.Plugin.EO;
-using EOAP.Plugin.Patcher;
+using EOAP.Plugin.Patcher.Configuration;
+using EOAP.Plugin.Patcher.Feature;
 using HarmonyLib;
 using Newtonsoft.Json;
 using System;
@@ -25,7 +26,9 @@ namespace EOAP.Plugin.Behaviours
         private APUI _UI;
         private Dictionary<APUI.UIAction, Action> _actionMap;
         private APState _state;
+#if AP_DEBUG
         private APDebug _debug;
+#endif
         private string _persistentFileName;
         private List<Harmony> _patchers;
 
@@ -47,7 +50,7 @@ namespace EOAP.Plugin.Behaviours
                 APUserConfiguration.CreateDefaultSaveFile();
             }
 
-            APUserConfiguration connectionFile = APUserConfiguration.LoadConnectionFile();
+            APUserConfiguration configFile = APUserConfiguration.LoadConnectionFile();
             _persistent = new EOPersistent();
             s_Instance = this;
             // State
@@ -57,25 +60,36 @@ namespace EOAP.Plugin.Behaviours
             EO1.LoadDatabase();
             // UI Views
             _UI = new APUI();
-            _UI.ShowDebug = connectionFile.DebugUtils;
-            _UI.Hostname = connectionFile.Hostname;
-            _UI.SlotName = connectionFile.Slotname;
-            _UI.Password = connectionFile.Password;
+#if AP_DEBUG
+            _UI.ShowDebug = configFile.DebugUtils;
+#endif
+            _UI.Hostname = configFile.Hostname;
+            _UI.SlotName = configFile.Slotname;
+            _UI.Password = configFile.Password;
             // UI Actions
             _actionMap = new Dictionary<APUI.UIAction, Action>();
             _actionMap.Add(APUI.UIAction.Connect, StartSession);
             // Harmony Stuff
             _patchers = new List<Harmony>();
-            Harmony patcher = new Harmony("eaop.patch");
+            Harmony patcher = new Harmony("eoap.patch");
             patcher.PatchAll();
-            Feature_ItemSync.Patch(patcher);
+            ItemSync.Patch(patcher);
             _patchers.Add(patcher);
+
+            if (configFile.SkipTutorials)
+            {
+                patcher = new Harmony("eoap.boredom");
+                BoredomSkip.Patch(patcher);
+                _patchers.Add(patcher);
+            }
             // DBG
+#if AP_DEBUG
             _debug = new APDebug(_UI);
+#endif
             UI.SetUIVisibility(true);
 
             //
-            if (connectionFile.FastQuit)
+            if (configFile.FastQuit)
             {
                 Application.quitting = null;
                 Application.wantsToQuit = null;
@@ -90,7 +104,9 @@ namespace EOAP.Plugin.Behaviours
                 _UI.Hostname = connectionFile.Hostname;
                 _UI.SlotName = connectionFile.Slotname;
                 _UI.Password = connectionFile.Password;
+#if AP_DEBUG
                 _UI.ShowDebug = connectionFile.DebugUtils;
+#endif
                 _UI.ResetStyle();
             }
             if (_UI != null && _UI.ShowUI)
@@ -154,7 +170,7 @@ namespace EOAP.Plugin.Behaviours
         // States Changes
         private void OnState_Connected()
         {
-            UI.DisplayMenu(-1);
+            UI.SetWindow(-1);
             UI.SetUIVisibility(false);
             _persistentFileName = EOPersistent.GetFilePath(_session.Session.RoomState.Seed, _session.Session.ConnectionInfo.Slot);
 

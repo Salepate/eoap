@@ -1,10 +1,10 @@
 ﻿using EOAP.Plugin.EO;
 using HarmonyLib;
 
-namespace EOAP.Plugin.Patcher
+namespace EOAP.Plugin.Patcher.Feature
 {
     [HarmonyPatch(typeof(SQSceneManager), nameof(SQSceneManager.LoadedEntranceOpeningEvent))]
-    internal class Feature_StartingGold
+    internal class StartingGold
     {
         public static void Prefix()
         {
@@ -16,7 +16,7 @@ namespace EOAP.Plugin.Patcher
                 if (delta > 0)
                     GoldItem.GiveGold((uint)delta);
                 else if (delta < 0)
-                    GoldItem.PayGold_WithoutSEPlay((uint)(-delta));
+                    GoldItem.PayGold_WithoutSEPlay((uint)-delta);
             }
         }
     }

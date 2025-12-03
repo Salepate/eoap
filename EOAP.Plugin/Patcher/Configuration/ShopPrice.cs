@@ -1,30 +1,10 @@
-﻿using EOAP.Plugin.Behaviours;
-using EOAP.Plugin.EO;
+﻿using EOAP.Plugin.EO;
 using HarmonyLib;
 using Town;
-using static ItemNoEnum;
 
-namespace EOAP.Plugin.Patcher
+namespace EOAP.Plugin.Patcher.Configuration
 {
-    public class ItemOverride
-    {
-        public static int OverrideNextPurchase = -1;
-
-        public static uint GetNewPrice(uint currentPrice)
-        {
-            if (EOConfig.UseOverride)
-            {
-                if (EOConfig.PriceOverride >= 0)
-                    return (uint)EOConfig.PriceOverride;
-                return currentPrice;
-            }
-            else
-            {
-                long newPrice = (currentPrice * EOConfig.PriceScale) / 100;
-                return (uint)newPrice;
-            }
-        }
-    }
+    using ITEM_NO = ItemNoEnum.ITEM_NO;
 
     [HarmonyPatch(typeof(ShopBuyMenu), nameof(ShopBuyMenu.Buy))]
     public static class ShopBuyMenu_Buy
@@ -33,20 +13,20 @@ namespace EOAP.Plugin.Patcher
         {
             int itemID = GBKKIPAKICJ;
             GoldItem.GetBasicItemData((ITEM_NO)itemID, out GoldItem.BASIC_ITEM_DATA itemData);
-            uint price = ItemOverride.GetNewPrice(itemData.GMDGMCMPOHE);
-            ItemOverride.OverrideNextPurchase = (int)price;
+            uint price = EO1.GetNewPrice(itemData.GMDGMCMPOHE);
+            EO1.OverrideNextPurchase = (int)price;
         }
     }
-        
+
     [HarmonyPatch(typeof(GoldItem), nameof(GoldItem.PayGold))]
     public class GoldItem_PayGold
     {
         public static void Prefix(ref uint FHPBLHJDMGC)
         {
-            if (ItemOverride.OverrideNextPurchase != -1)
+            if (EO1.OverrideNextPurchase != -1)
             {
-                FHPBLHJDMGC = (uint)ItemOverride.OverrideNextPurchase;
-                ItemOverride.OverrideNextPurchase = -1;
+                FHPBLHJDMGC = (uint)EO1.OverrideNextPurchase;
+                EO1.OverrideNextPurchase = -1;
             }
         }
     }
@@ -56,10 +36,10 @@ namespace EOAP.Plugin.Patcher
     {
         public static void Prefix(ref uint FHPBLHJDMGC)
         {
-            if (ItemOverride.OverrideNextPurchase != -1)
+            if (EO1.OverrideNextPurchase != -1)
             {
-                FHPBLHJDMGC = (uint)ItemOverride.OverrideNextPurchase;
-                ItemOverride.OverrideNextPurchase = -1;
+                FHPBLHJDMGC = (uint)EO1.OverrideNextPurchase;
+                EO1.OverrideNextPurchase = -1;
             }
         }
     }
@@ -76,23 +56,24 @@ namespace EOAP.Plugin.Patcher
                 string price = item.ELLNBOJNCPG;
                 try
                 {
-                    item.ELLNBOJNCPG = ItemOverride.GetNewPrice(uint.Parse(item.ELLNBOJNCPG)).ToString();
+                    item.ELLNBOJNCPG = EO1.GetNewPrice(uint.Parse(item.ELLNBOJNCPG)).ToString();
                 }
                 catch (System.Exception e)
                 {
                     item.ELLNBOJNCPG = price;
+                    GDebug.LogError(e.Message);
                 }
             }
         }
     }
 
-    [HarmonyPatch(typeof(Item), nameof(Item.GetPrice), [typeof(ItemNoEnum.ITEM_NO)])]
+    [HarmonyPatch(typeof(Item), nameof(Item.GetPrice), [typeof(ITEM_NO)])]
     public class Item_GetPrice2
     {
-        public static void Postfix(ref uint __result, Item __instance, ItemNoEnum.ITEM_NO KIPKFLDGMFM)
+        public static void Postfix(ref uint __result, Item __instance, ITEM_NO KIPKFLDGMFM)
         {
             EOMemory.ShopMenuItemIndex = (int)KIPKFLDGMFM;
-            __result = ItemOverride.GetNewPrice(__result);
+            __result = EO1.GetNewPrice(__result);
         }
     }
 }

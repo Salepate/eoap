@@ -1,5 +1,4 @@
-﻿using Common;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 
@@ -8,7 +7,6 @@ namespace EOAP.Plugin.DB
     public static class Builder
     {
         private static DynDB s_DB;
-        private  static JsonConverter m_Converter;
         static Builder()
         {
             s_DB = new DynDB();

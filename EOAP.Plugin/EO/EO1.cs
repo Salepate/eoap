@@ -1,6 +1,7 @@
 ﻿using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
 using EOAP.Plugin.DB;
+using Master;
 using System.Collections.Generic;
 
 namespace EOAP.Plugin.EO
@@ -8,21 +9,45 @@ namespace EOAP.Plugin.EO
     public static class EO1
     {
         public const string WorldName = "Etrian Odyssey HD";
-        public const string DynDBPath = "Bepinex/plugins/EOAPResources/dyndb.json";
+        public const string DynDBPath = "Bepinex/plugins/Resources/dyndb.json";
         public const string ItemTable = "Items";
         public const string FlagTable = "Flags";
         public const string TreasureBoxTable = "TreasureBoxes";
+
+
+        public static readonly HashSet<int> AutoFlags = new HashSet<int>()
+        {
+            3072,   // Town first time visit
+            3073,   // The Rooster Inn first time visit,
+            608,    // The Rooster Inn first time dialogue
+            3076,   // Explorer Guild first time visit
+            656,    // Ceft Apothecary first time dialogue
+            3074,   // Ceft Apothecary first time visit
+            672,    // Golden Deer Pub first time dialogue
+            3077,   // Golden Deer Pub first time visit
+            624,    // Shilleka's good first time dialogue
+            3075,   // Shilleka's good first time visit
+            3079,   // Forest Entrance first time visit
+            3078,   // Radha Hall first time visit
+            592,    // Radha Hall first time dialogue
+            112,    // forest warning
+            640,    // Some other dialogue
+            643,    // guild name set
+            644,    // going yolo?
+            120,    // Adventurer initiation flag
+            116,    // soldier awaiting you
+        };
 
         public static readonly Dictionary<int, string> GameItems = new Dictionary<int, string>() { };
         public static readonly Dictionary<int, string> FlagLocations = new Dictionary<int, string>();
         public static Dictionary<long, System.Action<long>> CustomItems = new Dictionary<long, System.Action<long>>()
         {
             { 1000002, SendVictory },
-            { 1000003, EntalReward }, // 500en
-            { 1000004, EntalReward }, // 200en
-            { 1000005, EntalReward }, // 100en
-            { 1000008, EntalReward }, // 50en
-            { 1000009, EntalReward }, // 1en
+            { 1000003, (v) => EntalReward(500) }, // 500en
+            { 1000004, (v) => EntalReward(200) }, // 200en
+            { 1000005, (v) => EntalReward(100) }, // 100en
+            { 1000008, (v) => EntalReward(50) }, // 50en
+            { 1000009, (v) => EntalReward(1) }, // 1en
             // Unhandled yet
             //FIRST_STRATUM_CLEARED: 1000001,
             //NIGHT_10TP: 1000006, (note: disregard time)
@@ -131,7 +156,29 @@ namespace EOAP.Plugin.EO
 
 
         // API
+        public static int OverrideNextPurchase = -1;
+        public static uint GetNewPrice(uint currentPrice)
+        {
+            if (EOConfig.UseOverride)
+            {
+                if (EOConfig.PriceOverride >= 0)
+                    return (uint)EOConfig.PriceOverride;
+                return currentPrice;
+            }
+            else
+            {
+                long newPrice = (currentPrice * EOConfig.PriceScale) / 100;
+                return (uint)newPrice;
+            }
+        }
 
+        public static void LoadAutoFlags()
+        {
+            foreach(var autoflag in AutoFlags)
+            {
+                EventFlagTbl.SetEventFlag(autoflag, true);
+            }
+        }
         public static void PlaySFX(Shinigami.SFX sfx)
         {
             string sfxName = Shinigami.SFXPath[(int)sfx];

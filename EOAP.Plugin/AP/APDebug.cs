@@ -1,4 +1,6 @@
-﻿using Dirt.Hackit;
+﻿#if AP_DEBUG
+
+using Dirt.Hackit;
 using EOAP.Plugin.Behaviours;
 using EOAP.Plugin.DB;
 using EOAP.Plugin.Dirt;
@@ -13,6 +15,7 @@ using UnityEngine.UI;
 
 namespace EOAP.Plugin.AP
 {
+
     // IMGUI UI
     public class APDebug
     {
@@ -100,7 +103,7 @@ namespace EOAP.Plugin.AP
         public static void PrintTreasureBox(int tboxID)
         {
             _lastTreasureBox = tboxID;
-            if (EOConfig.PrintActivatedFlags)
+            if (EOConfig.PrintTreasureBoxId)
                 GDebug.Log($"Last Treasure Box {_lastTreasureBox}");
         }
 
@@ -150,7 +153,7 @@ namespace EOAP.Plugin.AP
 
             if (swapToInspector)
             {
-                _ui.DisplayMenu(_menuInspector);
+                _ui.SetWindow(_menuInspector);
             }
         }
 
@@ -497,3 +500,5 @@ namespace EOAP.Plugin.AP
         }
     }
 }
+
+#endif

@@ -41,7 +41,7 @@ namespace EOAP.Plugin.AP
         private List<Action<Rect, APUI>> _subMenus { get; set; }
         private List<string> _subMenuLabels;
         private bool _styleReady;
-        private int _homeScreen;
+        private int _homeScreenIndex;
         public enum UIAction
         {
             None,
@@ -61,8 +61,8 @@ namespace EOAP.Plugin.AP
             _subMenuLabels = new List<string>();
             _subMenus = new List<Action<Rect, APUI>>();
             _styleReady = false;
-            _homeScreen = AddMenu(APHomeScreen.DrawHomescreen);
-            DisplayMenu(_homeScreen);
+            _homeScreenIndex = AddMenu(APHomeScreen.DrawHomescreen);
+            SetWindow(_homeScreenIndex);
         }
 
         public int AddMenu(System.Action<Rect, APUI> menu, string menuName = "")
@@ -72,9 +72,9 @@ namespace EOAP.Plugin.AP
             return _subMenus.Count - 1;
         }
 
-        public void DisplayMenu(int newWindow)
+        public void SetWindow(int newWindow, bool force = false)
         {
-            if (_subMenuIndex != newWindow && newWindow != -1)
+            if ((_subMenuIndex != newWindow && newWindow != -1) || force)
             {
                 _subMenuIndex = newWindow;
             }
@@ -137,7 +137,7 @@ namespace EOAP.Plugin.AP
             toggleRect.height = WindowHeight;
             archipelagoPanel.xMin = toggleRect.xMax;
 
-            if (_subMenuIndex != _homeScreen)
+            if (_subMenuIndex != _homeScreenIndex)
             {
                 if (GUI.Button(toggleRect, ShowUI ? "-" : "+"))
                 {
@@ -203,6 +203,18 @@ namespace EOAP.Plugin.AP
 
         public void DrawConnectionMenu(Rect rect)
         {
+            var session = APBehaviour.GetSession();
+            if (session == null || !session.Connected)
+            {
+                if (_subMenuIndex != _homeScreenIndex)
+                {
+                    if (GUILayout.Button("Open Homescreen"))
+                    {
+                        SetWindow(_homeScreenIndex, true);
+                        SetUIVisibility(true);
+                    }
+                }
+            }
         }
 
         private void DrawMenuTabs(Rect pos)
@@ -236,7 +248,7 @@ namespace EOAP.Plugin.AP
 
             if (nextWindow != -1)
             {
-                DisplayMenu(nextWindow);
+                SetWindow(nextWindow);
             }
         }
 

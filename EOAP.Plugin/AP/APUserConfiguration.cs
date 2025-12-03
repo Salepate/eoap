@@ -6,13 +6,14 @@ namespace EOAP.Plugin.AP
     [System.Serializable]
     public class APUserConfiguration
     {
-        public static string GetFilePath() => "ap_connection.json";
+        public static string GetFilePath() => "ap_config.json";
 
         public string Hostname;
         public string Slotname;
         public string Password;
         public bool DebugUtils;
         public bool FastQuit;
+        public bool SkipTutorials;
 
         public static bool FileExists { get; internal set; }
 
