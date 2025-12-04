@@ -14,6 +14,7 @@ namespace EOAP.Plugin.Patcher.Core
 
         public static void TryLoadData()
         {
+            EOMemory.LoadFixedDatabase();
             _persistent = APBehaviour.GetPersistent();
             _session = APBehaviour.GetSession();
             EO1.LoadAutoFlags();

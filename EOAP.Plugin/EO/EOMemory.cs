@@ -4,6 +4,7 @@ namespace EOAP.Plugin.EO
 {
     public static class EOMemory
     {
+        public static bool IsLoading { get; private set; }
         public static int ShopMenuItemIndex = -1;
 
         public static ItemCustom Invalid = new ItemCustom() { Checked = true, Hint = "Invalid", Infinite = false };
@@ -23,5 +24,22 @@ namespace EOAP.Plugin.EO
         }
 
         public static bool IsMissingLocation(ItemNoEnum.ITEM_NO no) => !GetItem(no).Checked;
+
+        public static void LoadFixedDatabase()
+        {
+            IsLoading = true; // used to prevent patch from messing original values
+            int matCount = 0;
+            for(int i = 0; i < Items.Length; ++i)
+            {
+                ItemNoEnum.ITEM_NO itemNo = (ItemNoEnum.ITEM_NO)i;
+                ref ItemCustom item = ref GetItem(itemNo);
+                item.Material = ItemMain.Item_GetMaterialItemNum(itemNo) > 0;
+                item.BasePrice = Item.GetPrice(itemNo);
+                item.SellPrice = Item.GetSellPrice(itemNo);
+                matCount += item.Material ? 1 : 0;
+            }
+            IsLoading = false;
+            GDebug.Log($"Marked {matCount} items as materials");
+        }
     }
 }

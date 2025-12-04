@@ -44,7 +44,6 @@ namespace EOAP.Plugin.Behaviours
 
         private void Start()
         {
-
             if (!APUserConfiguration.FileExists)
             {
                 APUserConfiguration.CreateDefaultSaveFile();
@@ -74,6 +73,7 @@ namespace EOAP.Plugin.Behaviours
             Harmony patcher = new Harmony("eoap.patch");
             patcher.PatchAll();
             ItemSync.Patch(patcher);
+            ShopPrice.Patch(patcher);
             _patchers.Add(patcher);
 
             if (configFile.SkipTutorials)
