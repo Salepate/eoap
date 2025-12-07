@@ -1,5 +1,6 @@
 ﻿using EOAP.Plugin.AP;
 using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.DB;
 using EOAP.Plugin.EO;
 using HarmonyLib;
 using Master;
@@ -13,10 +14,10 @@ namespace EOAP.Plugin.Patcher.Feature
         {
             if (LHIBOLMPPOI)
             {
-                if (EO1.FlagLocations.TryGetValue(IINBFPLGLMN, out string locStr))
+                if (EO1.FlagLocations.TryGetValue(IINBFPLGLMN, out Entry locEntry))
                 {
-                    APBehaviour.GetPersistent().AddSkipItems(IINBFPLGLMN, EO1.EventRewards);
-                    APBehaviour.GetSession().SendLocation(locStr);
+                    APBehaviour.GetPersistent().AddSkipItems(locEntry.Items);
+                    APBehaviour.GetSession().SendLocation(locEntry.LocationName);
                 }
 #if AP_DEBUG
                 APDebug.PrintActivateFlag(IINBFPLGLMN);

@@ -13,9 +13,9 @@ namespace EOAP.Plugin.EO
         public int LastIndex = -1;
         public List<long> PendingItems = new List<long>();
         public List<long> CompleteLocations = new List<long>();
+        public List<long> DefeatedEnemies = new List<long>(); // until i find how to check save data
 
         public List<long> ItemsToSkip = new List<long>();
-        public List<int> EntalToSkip = new List<int>();
 
         public static string GetFilePath(string seed, int slot)
         {
@@ -36,9 +36,15 @@ namespace EOAP.Plugin.EO
 
             for (int i = ItemsToSkip.Count - 1; i >= 0; --i)
             {
-                if (GoldItem.GetPartyCarrySameItem((ItemNoEnum.ITEM_NO)ItemsToSkip[i]) > 0)
+                long id = ItemsToSkip[i];
+                if (id > (long)ItemNoEnum.ITEM_NO.ITEM_NOT && id < (long)ItemNoEnum.ITEM_NO.ITEM_END)
                 {
                     GoldItem.DeletePartyItem((ItemNoEnum.ITEM_NO)ItemsToSkip[i]);
+                    ItemsToSkip.RemoveAt(i);
+                }
+                else if (EO1.CustomItemsDespawn.TryGetValue(id, out var despawner))
+                {
+                    despawner(id);
                     ItemsToSkip.RemoveAt(i);
                 }
             }
@@ -73,17 +79,9 @@ namespace EOAP.Plugin.EO
             }
         }
 
-        public void AddSkipItems(int index, Dictionary<int, List<long>> itemDic = null, Dictionary<int, long> enDic = null)
+        public void AddSkipItems(IList<long> itemIDs)
         {
-            if (itemDic != null && itemDic.TryGetValue(index, out List<long> itemRewards))
-            {
-                ItemsToSkip.AddRange(itemRewards);
-            }
-
-            if (enDic != null && enDic.TryGetValue(index, out long entalValue))
-            {
-                EntalToSkip.Add((int)entalValue);
-            }
+            ItemsToSkip.AddRange(itemIDs);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace EOAP.Plugin.EO
         public const string DynDBPath = "Bepinex/plugins/Resources/dyndb.json";
         public const string ItemTable = "Items";
         public const string FlagTable = "Flags";
-        public const string TreasureBoxTable = "TreasureBoxes";
+        public const string EnemyTable = "Enemies";
 
 
         public static readonly HashSet<int> AutoFlags = new HashSet<int>()
@@ -38,20 +38,43 @@ namespace EOAP.Plugin.EO
             116,    // soldier awaiting you
         };
 
-        public static readonly Dictionary<int, string> GameItems = new Dictionary<int, string>() { };
-        public static readonly Dictionary<int, string> FlagLocations = new Dictionary<int, string>();
+        public static readonly Dictionary<int, Entry> GameItems = new Dictionary<int, Entry>() { };
+        public static readonly Dictionary<int, Entry> GameEnemies = new Dictionary<int, Entry>();
+        public static readonly Dictionary<int, Entry> FlagLocations = new Dictionary<int, Entry>();
         public static Dictionary<long, System.Action<long>> CustomItems = new Dictionary<long, System.Action<long>>()
         {
             { 1000002, SendVictory },
             { 1000003, (v) => EntalReward(500) }, // 500en
             { 1000004, (v) => EntalReward(200) }, // 200en
             { 1000005, (v) => EntalReward(100) }, // 100en
-            { 1000008, (v) => EntalReward(50) }, // 50en
-            { 1000009, (v) => EntalReward(1) }, // 1en
+            { 1000006, (v) => EntalReward(50) }, // 50en
+            { 1000007, (v) => EntalReward(1) }, // 1en
+            { 1000008, (v) => EntalReward(400) }, // 400en
+
             // Unhandled yet
             //FIRST_STRATUM_CLEARED: 1000001,
             //NIGHT_10TP: 1000006, (note: disregard time)
             //FIRST_CHAR_10HP: 1000007,
+        };
+
+        public static Dictionary<uint, long> EntalItems = new Dictionary<uint, long>()
+        {
+            { 500, 1000003 },
+            { 200, 1000004 },
+            { 100, 1000005 },
+            { 50, 1000006 },
+            { 1, 1000007 },
+            { 400, 1000008 },
+        };
+
+        public static Dictionary<long, System.Action<long>> CustomItemsDespawn = new Dictionary<long, System.Action<long>>()
+        {
+            { 1000003, (v) => EntalPenalty(500) }, 
+            { 1000004, (v) => EntalPenalty(200) },
+            { 1000005, (v) => EntalPenalty(100) },
+            { 1000006, (v) => EntalPenalty(50) },
+            { 1000007, (v) => EntalPenalty(1) },
+            { 1000008, (v) => EntalPenalty(400) },
         };
 
         // Locations
@@ -62,19 +85,9 @@ namespace EOAP.Plugin.EO
             {0, "Adventurers Initiation - Complete" }
         };
 
-        // Event Reward Skips
-        public static Dictionary<int, List<long>> EventRewards = new Dictionary<int, List<long>>()
-        {
-            { 127, [4021] } // B1F Main - Moles Whitestone (Whitestone)
-        };
-
         public static Dictionary<int, List<long>> MissionRewards = new Dictionary<int, List<long>>()
         {
-            {0, [4373, 4373] } // Radha's Note (x2 dont know why)
-        };
-        public static Dictionary<int, long> MissionEnRewards = new Dictionary<int, long>()
-        {
-            { 0, 500 } // Adventurer's Initiation (500en)
+            {0, [4373, 4373, 1000003] } // Radha's Note (x2 dont know why)
         };
 
         public static void LoadDatabase()
@@ -82,7 +95,7 @@ namespace EOAP.Plugin.EO
             Builder.Load(DynDBPath);
             List<Entry> itemTbl = Builder.GetTable(ItemTable);
             List<Entry> flagTbl = Builder.GetTable(FlagTable);
-            List<Entry> treasureTbl = Builder.GetTable(TreasureBoxTable);
+            List<Entry> enemyTable = Builder.GetTable(EnemyTable);
 
             if (itemTbl == null)
             {
@@ -95,15 +108,12 @@ namespace EOAP.Plugin.EO
                 {
                     Entry entry = itemTbl[i];
 
-                    if (entry.Data == null || entry.Data.Length < 1)
-                        continue;
-
-                    if (string.IsNullOrEmpty(entry.Data[0]))
+                    if (!entry.IsValid)
                         continue;
 
                     if (!GameItems.ContainsKey(entry.ID))
                     {
-                        GameItems.Add(entry.ID, entry.Data[0]);
+                        GameItems.Add(entry.ID, entry);
                     }
                 }
 
@@ -121,35 +131,28 @@ namespace EOAP.Plugin.EO
                 {
                     Entry entry = flagTbl[i];
 
-                    if (entry.Data == null || entry.Data.Length < 1)
+                    if (!entry.IsValid)
                         continue;
 
-                    if (string.IsNullOrEmpty(entry.Data[0]))
-                        continue;
-                    FlagLocations.Add(entry.ID, entry.Data[0]);
+                    FlagLocations.Add(entry.ID, entry);
                 }
                 GDebug.Log($"Registered {FlagLocations.Count} flags");
             }
 
-            if (treasureTbl == null)
+            if (enemyTable == null)
             {
-                GDebug.LogError("Unable to load flag db");
+                GDebug.LogError("Unable to load enemy db");
             }
             else
             {
-                for (int i = 0; i < treasureTbl.Count; ++i)
+                for (int i = 0; i < enemyTable.Count; ++i)
                 {
-                    Entry entry = treasureTbl[i];
-
-                    if (entry.Data == null || entry.Data.Length < 1)
+                    Entry entry = enemyTable[i];
+                    if (string.IsNullOrEmpty(entry.LocationName))
                         continue;
-
-                    if (string.IsNullOrEmpty(entry.Data[0]))
-                        continue;
-
-                    TreasureBox.Add((uint)entry.ID, entry.Data[0]);
+                    GameEnemies.Add(entry.ID, entry);
                 }
-                GDebug.Log($"Registered {TreasureBox.Count} treasure boxes");
+                GDebug.Log($"Registered {GameEnemies.Count} enemies");
             }
         }
 
@@ -184,16 +187,6 @@ namespace EOAP.Plugin.EO
             string sfxName = Shinigami.SFXPath[(int)sfx];
             SoundManager.playSE(sfxName);
         }
-        public static string GetShopLocation(int itemID)
-        {
-            if (GameItems.TryGetValue(itemID, out string itemName))
-            {
-                if (Item.IsMedicine((ItemNoEnum.ITEM_NO)itemID))
-                    return string.Format("Apothecary - {0}", itemName);
-                return string.Format("Shop - {0}", itemName);
-            }
-            return string.Empty;
-        }
         // Callbacks
         private static void SendVictory(long obj)
         {
@@ -205,5 +198,9 @@ namespace EOAP.Plugin.EO
             GoldItem.GiveGold((uint)value);
         }
 
+        private static void EntalPenalty(long value)
+        {
+            GoldItem.PayGold_WithoutSEPlay((uint)value);
+        }
     }
 }

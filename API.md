@@ -2,39 +2,39 @@
 
 ## Action Menu
 
-### Aim
+### Desc
 Handle battle inputs
 
 ### Notes
 Did not have a chance to use it, but looks like it work
 
 ## Camp.CampMenuController
-### Aim
+### Desc
 Pause menu controller
 
 ### Methods
     * SetDecideKeepList -- invoked once each time the pause menu is open. But not sure what it does, probably a list of items to discard
 
 ## Master.Event
-### Aim
+### Desc
     Seems to control events/quest/missions operations
 
 ## Master.EventFlagTbl
-### Aim
+### Desc
     Contains all save flags and associated ops
 ### Methods
     GetEventFlag() - check a specific game flag state
     SetEventFlags - toggle a specific game flag
 
 ## Master.MasterManager
-### Aim
+### Desc
     Provide essential game data like monster data
 
 ## Methods
     GetMasterEnemyData() - retrieve monster data
 
 ## Master.MasterTbbData.ENEMY_DATA
-### Aim
+### Desc
     Store monster data, seems reallocated every time
 ### Fields
     FBBBOFLFELG - atk
@@ -44,7 +44,7 @@ Pause menu controller
 
 ## DungeonTreasureState
 
-### Aim
+### Desc
 Dungeon treasure box operations
 
 ### Notes
@@ -54,15 +54,20 @@ Monobehaviour
     * GetItemFunc() - retrieve the associated reward
     * TreasureOpenCheckFunc() - check if the tbox can be opened or is already opened
 
+## DungeonUtil
+### Methods
+    * SetDiscoveryEnemy() - invoked for each defeated enemy (triggered at result screen)
+
+
 ## Master.Event
-### Aim
+### Desc
 update quest and mission status
 
 ### Methods 
-    * SetEventMissionComplete -- invoked after the "COMPLETED" animation is done
+    * SetEventMissionComplete() - invoked after the "COMPLETED" animation is done
 ## GoldItem
 
-### Aim
+### Desc
 Party inventory management 
 
 ### Notes
@@ -77,7 +82,7 @@ Lots of static and working methods
     * BuyItem() - seems ignored
 
 ## ItemMain
-### Aim
+### Desc
 Retrieve static/persistent data regarding a specific Item
 
 ### Methods
@@ -85,7 +90,7 @@ Retrieve static/persistent data regarding a specific Item
 
 ## ShopBuyMenu
 
-### Aim
+### Desc
 Perform shop operations (Apothecary+Main Shop)
 
 ### Notes
@@ -98,7 +103,7 @@ Stable, but lots of wrapped data (like the selected item)
 
 ## TextLabelDataManager
 
-### Aim
+### Desc
 Singleton used to get localization keys
 
 ### Fields
@@ -109,7 +114,7 @@ Singleton used to get localization keys
 
 ## TitleMenu
 
-### Aim
+### Desc
 Monobehaviour that handles all title menu logic
 
 ### Methods
@@ -117,7 +122,7 @@ Monobehaviour that handles all title menu logic
 
 ## Town.ShopItemListController.Data
 
-### Aim
+### Desc
 contains item data used for selling/buying
 
 ### Fields

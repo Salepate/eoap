@@ -54,12 +54,16 @@ namespace EOAP.Plugin.Patcher.Feature
         public static bool Prefix(uint HAKGGLOIKMP)
         {
             EOPersistent persistent = APBehaviour.GetPersistent();
-            int idx = persistent.EntalToSkip.IndexOf((int)HAKGGLOIKMP);
             bool skipBase = false;
-            if (idx != -1)
+            bool possibleReward = EO1.EntalItems.TryGetValue(HAKGGLOIKMP, out long itemID);
+            if (possibleReward)
             {
-                skipBase = true;
-                persistent.EntalToSkip.RemoveAt(idx);
+                int skip_index = persistent.ItemsToSkip.IndexOf(itemID);
+                if (skip_index != -1)
+                {
+                    skipBase = true;
+                    persistent.ItemsToSkip.RemoveAt(skip_index);
+                }
             }
             return !skipBase;
         }

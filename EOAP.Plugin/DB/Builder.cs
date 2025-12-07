@@ -27,6 +27,7 @@ namespace EOAP.Plugin.DB
             {
                 string content = File.ReadAllText(path);
                 s_DB = JsonConvert.DeserializeObject<DynDB>(content);
+                s_DB.TrimNonUTF8();
                 GDebug.Log("loaded dyndb");
             }
             else
@@ -47,12 +48,12 @@ namespace EOAP.Plugin.DB
             GDebug.Log($"saved dyndb / tables : {s_DB.Tables.Count} / totale entries {entries}");
         }
 
-        public static void Push(string db, int id, params string[] additionalData)
+        public static void Push(string db, int id, string additionalData = "")
         {
             List<Entry> tbl = s_DB.GetTable(db);
             if (!DynDB.GetEntry(tbl, id, out int tblIndex))
             {
-                tbl.Add(new Entry() { ID = id, Data = additionalData });
+                tbl.Add(new Entry() { ID = id, Info = additionalData });
             }
         }
     }

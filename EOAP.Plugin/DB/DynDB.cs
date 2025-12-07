@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace EOAP.Plugin.DB
 {
@@ -47,12 +49,41 @@ namespace EOAP.Plugin.DB
                 Tables.Add(table.Key, copyEntries);
             }
         }
+
+        internal void TrimNonUTF8()
+        {
+            foreach(var tbl in Tables)
+            {
+                for(int j = 0; j < tbl.Value.Count; ++j)
+                {
+                    var entry = tbl.Value[j];
+                    bool trim = false;
+                    var str = entry.LocationName;
+                    trim = string.IsNullOrEmpty(str) || str.Length != Encoding.UTF8.GetByteCount(str);
+                    if (trim)
+                    {
+                        tbl.Value.RemoveAt(j--);
+                    }
+                }
+            }
+        }
     }
 
     [System.Serializable]
     public struct Entry
     {
-        public int ID;
-        public string[] Data;
+        public int ID; // game id
+        public long Location;
+        public string LocationName;
+        public long[] Items;
+        public string Info;
+        public bool HasItem => Items != null && Items.Length > 0;
+        public bool IsValid
+        {
+            get
+            {
+                return ID > 0 && Location > 0;
+            }
+        }
     }
 }

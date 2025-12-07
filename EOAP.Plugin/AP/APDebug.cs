@@ -1,5 +1,6 @@
 ﻿#if AP_DEBUG
 
+using Common;
 using Dirt.Hackit;
 using EOAP.Plugin.Behaviours;
 using EOAP.Plugin.DB;
@@ -9,9 +10,11 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Master;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static EnemyNoEnum;
 
 namespace EOAP.Plugin.AP
 {
@@ -70,6 +73,18 @@ namespace EOAP.Plugin.AP
                     EventFlagTbl.SetEventFlag(flags[i].ID, false);
             }
 
+            if (GUILayout.Button("Dump Enemy DB"))
+            {
+                for(int i = (int) ENEMY_NO.ENEMY_NO_001; i <= (int) ENEMY_NO.ENEMY_NO_199; ++i)
+                {
+                    string enemyName = TextLabelDataManager.BMIFAMFAEKK.GetEnemyName(i);
+                    if (!string.IsNullOrEmpty(enemyName) && enemyName.Length == Encoding.UTF8.GetByteCount(enemyName))
+                    {
+                        Builder.Push("Enemy", i, enemyName);
+                    }
+                }
+            }
+
             if (GUILayout.Button($"Show Flags in Console: [{EOConfig.PrintActivatedFlags}]"))
             {
                 EOConfig.PrintActivatedFlags = !EOConfig.PrintActivatedFlags;
@@ -79,10 +94,7 @@ namespace EOAP.Plugin.AP
             {
                 EOConfig.PrintTreasureBoxId = !EOConfig.PrintTreasureBoxId;
             }
-            GUILayout.EndVertical();
 
-
-            GUILayout.BeginVertical(GUILayout.Width(200f));
             if (GUILayout.Button("Save DynDB"))
             {
                 Builder.Dump(EO1.DynDBPath);
@@ -433,13 +445,13 @@ namespace EOAP.Plugin.AP
             ShowActiveToggle(Shinigami.InnUI, "Inn");
             ShowActiveToggle(Shinigami.InputTextWindow, "Input Text");
             GUILayout.EndVertical();
-            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(200f));
             GUILayout.Label("Sprites");
             ShowSpriteName(Shinigami.NotificationSprite);
             if (GUILayout.Button("Updates Refs"))
                 Shinigami.SetupTownReferences();
             GUILayout.EndVertical();
-            GUILayout.BeginVertical();
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(200f));
             if (GUILayout.Button("Test Keyboard"))
             {
                 // Show Ingame Keyboard
@@ -458,13 +470,23 @@ namespace EOAP.Plugin.AP
                 }
             }
             GUILayout.EndVertical();
-            GUILayout.BeginVertical();
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(200f));
+            GUILayout.Label("SFX");
             for (Shinigami.SFX sfx = Shinigami.SFX.SystemOk; sfx <= Shinigami.SFX.ClearMap; ++sfx)
             {
                 if (GUILayout.Button(sfx.ToString()))
                 {
                     EO1.PlaySFX(sfx);
                 }
+            }
+            GUILayout.EndVertical();
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(200f));
+            GUILayout.Label("BGM");
+            for (int i = 0; i < 28; ++i)
+            {
+                string bgmName = SoundData.GetBgmName(i);
+                if (GUILayout.Button($"{bgmName} ({i})"))
+                    SoundManager.changeBGM(bgmName, 1f, 0f, 1f, true, false, false, null);
             }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();

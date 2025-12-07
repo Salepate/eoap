@@ -3,10 +3,15 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
+using Dirt.Game.Math;
 using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.DB;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace EOAP.Plugin.EO
 {
@@ -126,6 +131,13 @@ namespace EOAP.Plugin.EO
                 LoginSuccessful success = (LoginSuccessful)result;
                 _loadedFlags = false;
                 EOConfig.LoadSessionConfiguration(success.SlotData);
+                RNGLite rng = new RNGLite();
+                byte[] bytes = Encoding.ASCII.GetBytes(Session.RoomState.Seed);
+                using (var sha1 = SHA1.Create())
+                {
+                    rng.SetSeed(BitConverter.ToInt64(sha1.ComputeHash(bytes)));
+                }
+                APBehaviour.SetRNG(rng);
                 Session.Items.ItemReceived += OnItemReceived;
             }
 
@@ -196,10 +208,7 @@ namespace EOAP.Plugin.EO
             Dictionary<long, int> reverseMap = new Dictionary<long, int>();
             foreach (var shopLocKVP in EO1.GameItems)
             {
-                long locID = Session.Locations.GetLocationIdFromName(EO1.WorldName, EO1.GetShopLocation(shopLocKVP.Key));
-                if (locID < 0)
-                    continue;
-
+                long locID = shopLocKVP.Value.Location;
                 if (Session.Locations.AllLocationsChecked.Contains(locID))
                 {
                     ref ItemCustom itemData = ref EOMemory.GetItem(shopLocKVP.Key);
@@ -257,5 +266,35 @@ namespace EOAP.Plugin.EO
             }
         }
 
+        internal void CheckGoal()
+        {
+            bool is_goal = EOConfig.Goals.Count > 0;
+            EOPersistent persistent = APBehaviour.GetPersistent();
+
+            if (persistent.IsGoal)
+                return;
+
+            HashSet<string> defeatedEnemies = new HashSet<string>();
+            for(int i = 0; i < persistent.DefeatedEnemies.Count; ++i)
+            {
+                if (EO1.GameEnemies.TryGetValue((int) persistent.DefeatedEnemies[i], out Entry enemyData))
+                {
+                    defeatedEnemies.Add(enemyData.LocationName);
+                }
+            }
+
+            for(int i = 0; i < EOConfig.Goals.Count && is_goal; ++i)
+            {
+                string goalName = EOConfig.Goals[i];
+                bool validate_goal = false;
+                validate_goal |= defeatedEnemies.Contains(goalName);
+                is_goal &= validate_goal;
+            }
+
+            if (is_goal)
+            {
+                SendGoal();
+            }
+        }
     }
 }

@@ -1,7 +1,8 @@
-﻿using EOAP.Plugin.AP;
-using EOAP.Plugin.Dirt;
+﻿using Dirt.Game.Math;
+using EOAP.Plugin.AP;
 using EOAP.Plugin.EO;
 using EOAP.Plugin.Patcher.Configuration;
+using EOAP.Plugin.Patcher.Core;
 using EOAP.Plugin.Patcher.Feature;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -13,6 +14,7 @@ namespace EOAP.Plugin.Behaviours
 {
     public class APBehaviour : MonoBehaviour
     {
+        public delegate void RNGDelegate(RNGLite room, RNGLite local);
         public enum APState
         {
             Offline,
@@ -33,7 +35,11 @@ namespace EOAP.Plugin.Behaviours
         private List<Harmony> _patchers;
 
         // API
+        internal RNGLite LocalRNG { get; private set; }
+        internal RNGLite RoomRNG { get; private set; }
         public static APUI UI => s_Instance._UI;
+
+        internal static event RNGDelegate NotifyRNGReady;
         public static EOSession GetSession() => s_Instance._session;
         public static EOPersistent GetPersistent() => s_Instance._persistent;
 
@@ -49,6 +55,7 @@ namespace EOAP.Plugin.Behaviours
                 APUserConfiguration.CreateDefaultSaveFile();
             }
 
+            LocalRNG = new RNGLite(DateTime.Now.Ticks);
             APUserConfiguration configFile = APUserConfiguration.LoadConnectionFile();
             _persistent = new EOPersistent();
             s_Instance = this;
@@ -66,14 +73,14 @@ namespace EOAP.Plugin.Behaviours
             _UI.SlotName = configFile.Slotname;
             _UI.Password = configFile.Password;
             // UI Actions
-            _actionMap = new Dictionary<APUI.UIAction, Action>();
-            _actionMap.Add(APUI.UIAction.Connect, StartSession);
-            // Harmony Stuff
+            _actionMap = new Dictionary<APUI.UIAction, Action>() { {APUI.UIAction.Connect, StartSession} };
+            // Patches
             _patchers = new List<Harmony>();
             Harmony patcher = new Harmony("eoap.patch");
             patcher.PatchAll();
             ItemSync.Patch(patcher);
             ShopPrice.Patch(patcher);
+            Goal.Patch(patcher);
             _patchers.Add(patcher);
 
             if (configFile.SkipTutorials)
@@ -89,6 +96,12 @@ namespace EOAP.Plugin.Behaviours
                 InfiniteFlyWing.Patch(patcher);
                 _patchers.Add(patcher);
             }
+
+            // Broken atm
+            //patcher = new Harmony("eoap.bgmshuffler");
+            //BGMShuffler.Patch(patcher);
+            //_patchers.Add(patcher);
+
             // DBG
 #if AP_DEBUG
             _debug = new APDebug(_UI);
@@ -233,6 +246,12 @@ namespace EOAP.Plugin.Behaviours
                 GDebug.Log("Creating custom save file");
                 s_Instance._persistent = new EOPersistent();
             }
+        }
+
+        internal static void SetRNG(RNGLite rng)
+        {
+            s_Instance.RoomRNG = rng;
+            APBehaviour.NotifyRNGReady?.Invoke(rng, s_Instance.LocalRNG);
         }
     }
 }

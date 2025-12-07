@@ -1,6 +1,8 @@
 ﻿using EOAP.Plugin.Behaviours;
+using EOAP.Plugin.DB;
 using EOAP.Plugin.EO;
 using HarmonyLib;
+using System.Linq;
 using Town;
 
 namespace EOAP.Plugin.Patcher.Feature
@@ -30,13 +32,12 @@ namespace EOAP.Plugin.Patcher.Feature
             int itemID = GBKKIPAKICJ;
             ref ItemCustom itemData = ref EOMemory.GetItem(itemID);
 
-            string loc = EO1.GetShopLocation(itemID);
-            long locID = session.GetLocationId(loc);
-            if (locID > 0)
+            
+            if (EO1.GameItems.TryGetValue(itemID, out Entry locInfo))
             {
                 bool sendLoc = false;
                 EOPersistent persistent = APBehaviour.GetPersistent();
-                if (!persistent.CompleteLocations.Contains(locID))
+                if (!persistent.CompleteLocations.Contains(locInfo.Location))
                 {
                     GoldItem.GetBasicItemData((ITEM_NO)itemID, out GoldItem.BASIC_ITEM_DATA itemDataBase);
                     uint price = EO1.GetNewPrice(itemDataBase.GMDGMCMPOHE);
@@ -47,7 +48,7 @@ namespace EOAP.Plugin.Patcher.Feature
                 if (sendLoc)
                 {
                     itemData.Checked = true;
-                    APBehaviour.GetSession().SendLocation(loc); // force resend loc anyway
+                    APBehaviour.GetSession().SendLocation(locInfo.LocationName); // force resend loc anyway
                 }
             }
 
@@ -74,12 +75,10 @@ namespace EOAP.Plugin.Patcher.Feature
             {
                 ShopItemListController.Data item = __result[i];
                 int itemID = item.GOGABMGPOND;
-                string loc = EO1.GetShopLocation(itemID);
-                long locID = session.GetLocationId(loc);
-                if (locID > 0 && !persistent.CompleteLocations.Contains(locID))
+                if (EO1.GameItems.TryGetValue(itemID, out Entry locInfo) && !persistent.CompleteLocations.Contains(locInfo.Location))
                 {
                     ref ItemCustom itemData = ref EOMemory.GetItem(itemID);
-                    string hint = !string.IsNullOrEmpty(itemData.Hint) ? itemData.Hint : $"AP Item {locID}";
+                    string hint = !string.IsNullOrEmpty(itemData.Hint) ? itemData.Hint : $"AP Item {locInfo.Location}";
                     item.CHMMJIGJPPC = hint;
                     item.CFMADGGDPDB = ItemType.eITEM_KIND.ITEM_KIND_ETC;
                     item.PFDNJNEFKMK = true;
