@@ -27,9 +27,7 @@ Require to downgrade EO: HD to the first version<br/>
 * Dumps - some logs that I generated to understand parts of the game
 
 ## Licensing
-
-There is no Licence at the the moment. <br/>
-No one may reproduce, distribute or create derivative work
+MIT Licence. <br/>
 
 ## Building
 
